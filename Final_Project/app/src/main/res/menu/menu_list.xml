@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/menu_add_icon"
+        android:title="הוספה"
+        android:icon="@drawable/plus"
+        android:showAsAction="always"/>
+    <item android:id="@+id/menu_edit_icon"
+        android:title="הוספה"
+        android:icon="@drawable/edit"
+        android:showAsAction="always"/>
+    <item android:id="@+id/menu_login"
+        android:title="התחברות"
+        android:showAsAction="never"/>
+    <item android:id="@+id/menu_register"
+        android:title="הרשמה"
+        android:showAsAction="never"
+        />
+    <item android:id="@+id/menu_main"
+        android:title="@string/main"
+        android:showAsAction="never"
+        />
+    <item android:id="@+id/menu_search"
+        android:title="@string/search"
+        android:showAsAction="never"
+        />
+    <item android:id="@+id/menu_articles"
+        android:title="@string/articles"
+        android:showAsAction="never"/>
+    <item android:id="@+id/menu_car_catalog"
+        android:title="@string/car_catalog"
+        android:showAsAction="never"
+        />
+    <item android:id="@+id/menu_about"
+        android:title="@string/about"
+        android:showAsAction="never"
+        />
+</menu>

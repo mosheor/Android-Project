@@ -1,0 +1,38 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.ben.final_project.Fragments.CompanyListFragment"
+    android:orientation="vertical"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="10dp">
+        <ImageView
+            android:id="@+id/car_list_company_image"
+            android:layout_width="match_parent"
+            android:layout_weight="2"
+            android:layout_height="60dp"
+            android:src="@drawable/bugatti"
+            android:layout_gravity="left"/>
+        <TextView
+            android:id="@+id/car_list_company_name"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="company name"
+            android:textSize="30dp"
+            android:layout_marginTop="10dp"
+            android:lines="1"
+            android:gravity="center"/>
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/frag_cars_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"></ListView>
+
+</LinearLayout>

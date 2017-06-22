@@ -1,0 +1,157 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.ben.final_project.Fragments.ArticleDetailesFragment"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/article_detailes_main_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_gravity="center"
+            android:text="כותרת ראשית"
+            android:textSize="30dp" />
+
+
+        <ImageView
+            android:id="@+id/article_detailes_image"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/car"/>
+
+        <TextView
+            android:id="@+id/article_detailes_sub_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_gravity="center"
+            android:text="כותרת משנית"
+            android:textSize="20dp" />
+
+        <TextView
+            android:id="@+id/article_detailes_content_article"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_gravity="right"
+            android:hint="תוכן הכתבה"
+            android:inputType="textCapSentences|textMultiLine"
+            android:maxLines ="50"
+            android:maxLength ="2000"
+            android:scrollHorizontally="true"
+            android:layout_weight="1"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="5dp"
+            android:textSize="18dp"
+            android:textDirection="rtl"
+            android:gravity="right"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="right">
+
+            <TextView
+                android:id="@+id/article_detailes_author"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="כותב הכתבה"
+                android:textSize="12dp"
+                android:layout_margin="10dp"
+                android:layout_gravity="right"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="כותב הכתבה"
+                android:textSize="12dp"
+                android:layout_margin="10dp"
+                android:layout_gravity="right"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="right">
+
+            <TextView
+                android:id="@+id/article_detailes_published_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="תאריך פרסום"
+                android:textSize="12dp"
+                android:layout_margin="10dp"
+                android:layout_gravity="right"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="תאריך פרסום"
+                android:textSize="12dp"
+                android:layout_margin="10dp"
+                android:layout_gravity="right"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="right">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="הערות"
+                android:textSize="24dp"
+                android:layout_margin="10dp"
+                android:layout_gravity="center"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:visibility="visible">
+
+                <EditText
+                    android:id="@+id/article_detailes_new_comment"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="2"
+                    android:textSize="16dp"
+                    android:layout_margin="10dp"
+                    android:maxLines ="3"
+                    android:maxLength ="100"
+                    android:scrollHorizontally="true"
+                    android:hint="כתוב פה..."
+                    android:textDirection="rtl"
+                    android:gravity="right"/>
+                <ImageButton
+                    android:id="@+id/article_detailes_add_button"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:src="@drawable/plus"
+                    android:scaleType="fitCenter"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/round_image_button"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/article_detailes_comments"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible"></ListView>
+
+    </LinearLayout>
+
+</ScrollView>

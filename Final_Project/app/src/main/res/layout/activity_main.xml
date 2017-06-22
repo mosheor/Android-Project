@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.ben.final_project.Activities.MainActivity"
+    android:orientation="vertical">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/main_articles"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:text="@string/articles"
+            android:layout_weight="1"
+            android:layout_gravity="bottom"
+            android:textSize="35dp"
+            android:background="@drawable/round_button"
+            android:layout_margin="10dp"/>
+        <Button
+            android:id="@+id/main_search"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:text="@string/search"
+            android:layout_gravity="bottom"
+            android:textSize="35dp"
+            android:layout_weight="1"
+            android:background="@drawable/round_button"
+            android:layout_margin="10dp"/>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/main_car_catalog"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:text="@string/car_catalog"
+            android:layout_weight="1"
+            android:layout_gravity="top"
+            android:textSize="35dp"
+            android:background="@drawable/round_button"
+            android:layout_margin="10dp"/>
+        <Button
+            android:id="@+id/main_about"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:text="@string/about"
+            android:layout_gravity="top"
+            android:textSize="35dp"
+            android:layout_weight="1"
+            android:background="@drawable/round_button"
+            android:layout_margin="10dp"/>
+
+    </LinearLayout>
+
+</LinearLayout>
+
+
+

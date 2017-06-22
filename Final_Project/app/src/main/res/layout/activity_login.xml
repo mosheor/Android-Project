@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.ben.final_project.Activities.LoginActivity"
+    android:orientation="vertical"
+    android:layout_marginTop="40dp"
+    android:layout_marginRight="20dp"
+    android:layout_marginLeft="20dp">
+
+
+    <EditText
+        android:id="@+id/login_username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="משתמש"
+        android:inputType="textEmailAddress"
+        android:maxLines="1"
+        android:textDirection="ltr"
+        android:textSize="25dp"
+        android:singleLine="true" />
+
+    <EditText
+        android:id="@+id/login_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="סיסמה"
+        android:imeActionId="@+id/login"
+        android:imeActionLabel="@string/action_sign_in_short"
+        android:imeOptions="actionUnspecified"
+        android:inputType="textPassword"
+        android:maxLines="1"
+        android:textSize="25dp"
+        android:maxLength="16"
+        android:singleLine="true" />
+s
+    <Button
+        android:layout_marginTop="40dp"
+        android:id="@+id/Login_sign_in_button"
+        style="?android:textAppearanceSmall"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="התחבר"
+        android:textStyle="bold"
+        android:textSize="25dp"
+        android:background="@color/color_light_blue"/>
+
+</LinearLayout>
