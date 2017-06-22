@@ -3,7 +3,7 @@ Or and ben - android final project repo.
 working with git:
 
 1. git init
-2. git remote add origin https://github.com/mosheor/new-repo.git
+2. git remote add origin https://github.com/mosheor/Android-Project.git
 
 ---some work in the proj
 
