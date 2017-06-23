@@ -18,7 +18,7 @@ public class ArticleModel {
             article.imageUrl = "image url";
             article.subTitle = "Sub Title number " + i;
             article.author = "Author number " + i;
-            article.published_date = "15/05/1999";
+            article.publish_date = "15/05/1999";
             article.content = "content number1\n" +
                     "content number2\n" +
                     "content number3\n" +
@@ -96,7 +96,7 @@ public class ArticleModel {
                 article.mainTitle = editedArticle.mainTitle;
                 article.subTitle = editedArticle.subTitle;
                 article.author = editedArticle.author;
-                article.published_date = editedArticle.published_date;
+                article.publish_date = editedArticle.publish_date;
                 article.imageUrl = editedArticle.imageUrl;
                 return true;
             }

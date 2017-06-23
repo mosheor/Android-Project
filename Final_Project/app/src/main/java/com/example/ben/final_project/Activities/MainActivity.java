@@ -9,11 +9,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.example.ben.final_project.R;
 
 public class MainActivity extends Activity {
 
+    private int i;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,87 +26,94 @@ public class MainActivity extends Activity {
         Button catalog_btn = (Button) findViewById(R.id.main_car_catalog);
         Button search_btn = (Button) findViewById(R.id.main_search);
 
-        articles_btn.setOnClickListener(new View.OnClickListener() {
+        //init the onclick listener - one listener for all buttons
+        View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("TAG","MainActivity articles_btn");
-                Intent intent = new Intent(MainActivity.this,ArticlesActivity.class);
-                startActivity(intent);
+                Class intentClass = null;
+
+                //which button was pressed?
+                switch (v.getId()){
+                    case R.id.main_articles:
+                        intentClass = ArticlesActivity.class;
+                        break;
+                    case R.id.main_about:
+                        intentClass = AboutActivity.class;
+                        break;
+                    case R.id.main_car_catalog:
+                        intentClass = CarCatalogActivity.class;
+                        break;
+                    case R.id.main_search:
+                        intentClass = SearchActivity.class;
+                        break;
+                    default:
+                        throw new RuntimeException("Error id in btn click in MainActivity");
+                }
+
+                commitIntentToActivity(intentClass);
             }
-        });
-        about_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("TAG","MainActivity about_btn");
-                Intent intent = new Intent(MainActivity.this,AboutActivity.class);
-                startActivity(intent);
-            }
-        });
-        catalog_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("TAG","MainActivity catalog_btn");
-                Intent intent = new Intent(MainActivity.this,CarCatalogActivity.class);
-                startActivity(intent);
-            }
-        });
-        search_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("TAG","MainActivity search_btn");
-                Intent intent = new Intent(MainActivity.this,SearchActivity.class);
-                startActivity(intent);
-            }
-        });
+        };
+
+        //set the listener for all the buttons
+        articles_btn.setOnClickListener(onClickListener);
+        about_btn.setOnClickListener(onClickListener);
+        catalog_btn.setOnClickListener(onClickListener);
+        search_btn.setOnClickListener(onClickListener);
     }
 
+    private void commitIntentToActivity(Class to)
+    {
+        Intent intent = new Intent(this, to);
+        startActivity(intent);
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_list, menu);
 
-        MenuItem addItem = menu.findItem(R.id.menu_add_icon);
-        MenuItem editItem = menu.findItem(R.id.menu_edit_icon);
-
-        addItem.setVisible(false);
-        editItem.setVisible(false);
+        menu.findItem(R.id.menu_add_icon).setVisible(false);
+        menu.findItem(R.id.menu_edit_icon).setVisible(false);
 
         return true;
     }
 
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == R.id.menu_about) {
-            Log.d("TAG","MainActivity menu_about");
-            Intent intent = new Intent(MainActivity.this,AboutActivity.class);
-            startActivity(intent);
+        Class intentClass = null;
+        boolean commitIntent = true;
+
+        //which btn from the menu was pressed?
+        switch (item.getItemId()){
+            case R.id.menu_about:
+                intentClass = AboutActivity.class;
+                break;
+            case R.id.menu_articles:
+                intentClass = ArticlesActivity.class;
+                break;
+            case R.id.menu_car_catalog:
+                intentClass = CarCatalogActivity.class;
+                break;
+            case R.id.menu_login:
+                intentClass = LoginActivity.class;
+                break;
+            case R.id.menu_register:
+                intentClass = RegisterActivity.class;
+                break;
+            case R.id.menu_search:
+                intentClass = SearchActivity.class;
+                break;
+            case R.id.menu_main:
+                commitIntent = false;
+                Toast.makeText(this, "you are already here", Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                throw new RuntimeException("Error id in btn click in the menu of MainActivity");
         }
-        else if(item.getItemId() == R.id.menu_articles){
-            Log.d("TAG","MainActivity menu_articles");
-            Intent intent = new Intent(MainActivity.this,ArticlesActivity.class);
-            startActivity(intent);
-        }
-        else if(item.getItemId() == R.id.menu_car_catalog){
-            Log.d("TAG","MainActivity menu_car_catalog");
-            Intent intent = new Intent(MainActivity.this,CarCatalogActivity.class);
-            startActivity(intent);
-        }
-        else if(item.getItemId() == R.id.menu_login){
-            Log.d("TAG","MainActivity menu_login");
-            Intent intent = new Intent(MainActivity.this,LoginActivity.class);
-            startActivity(intent);
-        }
-        else if(item.getItemId() == R.id.menu_register){
-            Log.d("TAG","MainActivity menu_register");
-            Intent intent = new Intent(MainActivity.this,RegisterActivity.class);
-            startActivity(intent);
-        }
-        else if(item.getItemId() == R.id.menu_search){
-            Log.d("TAG","MainActivity menu_search");
-            Intent intent = new Intent(MainActivity.this,SearchActivity.class);
-            startActivity(intent);
-        }
-        else if(item.getItemId() == R.id.menu_main){
-            Log.d("TAG","MainActivity menu_main");
-        }
+
+        if (commitIntent)
+            commitIntentToActivity(intentClass);
+
         return true;
     }
 

@@ -165,7 +165,7 @@ public class CarListSearchFragment extends Fragment {
 
             Car car= carsData.get(position);
             companyLogo.setImageResource(R.drawable.car);
-            companyName.setText(car.companName + " - " + car.modelName);
+            companyName.setText(car.companyName + " - " + car.modelName);
             companyName.setTextSize(20);
 
             Log.d("TAG","car num" + position);

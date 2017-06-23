@@ -14,7 +14,6 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.example.ben.final_project.Model.Car;
-import com.example.ben.final_project.Model.CarCompany;
 import com.example.ben.final_project.Model.Model;
 import com.example.ben.final_project.R;
 
@@ -83,7 +82,7 @@ public class EditCarFragment extends Fragment {
 
         car = Model.instance.getModel(companyID,carID);
 
-        companyName.setText(car.companName);
+        companyName.setText(car.companyName);
         companyName.setEnabled(false);
         carName.setText(car.modelName);
         carDescription.setText(car.description);
@@ -158,7 +157,7 @@ public class EditCarFragment extends Fragment {
                     car.fuelConsumption = Integer.parseInt(fuelConsumption.getText().toString());
                     car.zeroToHundrend = Integer.parseInt(zeroToHundrend.getText().toString());
                     car.carPicture = picture.getText().toString();
-                    car.companName = companyName.getText().toString();
+                    car.companyName = companyName.getText().toString();
                     car.companyID = companyID;
                     car.description = carDescription.getText().toString();
                     car.engineVolume = Integer.parseInt(engineVolume.getText().toString());

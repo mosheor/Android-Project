@@ -24,7 +24,7 @@ import java.util.List;
 public class CompanyListFragment extends Fragment {
 
     ListView list;
-    List<CarCompany> compniesData = Model.instance.getAllCompanies();
+    List<CarCompany> companiesData = Model.instance.getAllCompanies();
     CompanyListAdapter adapter;
     CompanyListFragmentDelegate listener;
 
@@ -43,7 +43,7 @@ public class CompanyListFragment extends Fragment {
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                listener.selectModelsDetilesClick(compniesData.get(position).id);
+                listener.selectModelDetailsClick(companiesData.get(position).id);
             }
         });
 
@@ -68,7 +68,7 @@ public class CompanyListFragment extends Fragment {
     }
 
     public interface CompanyListFragmentDelegate{
-        void selectModelsDetilesClick(String id);
+        void selectModelDetailsClick(String id);
         void selectCompanyDetailsClick(String id);
     }
 
@@ -85,7 +85,7 @@ public class CompanyListFragment extends Fragment {
 
         @Override
         public int getCount() {
-            return compniesData.size();
+            return companiesData.size();
         }
 
         @Override
@@ -107,7 +107,7 @@ public class CompanyListFragment extends Fragment {
             ImageView companyLogo = (ImageView) convertView.findViewById(R.id.row_company_or_car_logo);
             TextView companyName = (TextView) convertView.findViewById(R.id.row_company_or_car_name);
 
-            CarCompany company= compniesData.get(position);
+            CarCompany company= companiesData.get(position);
             companyLogo.setImageResource(R.drawable.audi_logo);
             companyName.setText(company.name);
 
@@ -116,7 +116,7 @@ public class CompanyListFragment extends Fragment {
             companyLogo.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    listener.selectCompanyDetailsClick(compniesData.get(position).id);
+                    listener.selectCompanyDetailsClick(companiesData.get(position).id);
                 }
             });
             return convertView;

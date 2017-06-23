@@ -1,5 +1,7 @@
 package com.example.ben.final_project.Model;
 
+import android.widget.EditText;
+
 import java.util.List;
 
 /**
@@ -17,6 +19,22 @@ public class Model {
         articleModel = new ArticleModel();
         companyModel = new CompanyModel();
         userModel = new UserModel();
+    }
+
+    public boolean isValidNewUser(User user) {
+        User user1 = getUser(user.userName); //todo chane the param name
+        //todo check if the new user is valid
+        return false;
+    }
+
+        public boolean isValidUser(String username, String password){
+        User user = getUser(username);
+        if(user != null){
+            if(user.password.compareTo(password) == 0){
+                return true;
+            }
+        }
+        return false;
     }
 
     public List<CarCompany> getAllCompanies(){

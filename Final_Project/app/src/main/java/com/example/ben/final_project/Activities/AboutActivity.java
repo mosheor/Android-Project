@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.example.ben.final_project.R;
 
@@ -22,53 +23,55 @@ public class AboutActivity extends Activity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_list, menu);
 
-        MenuItem addItem = menu.findItem(R.id.menu_add_icon);
-        MenuItem editItem = menu.findItem(R.id.menu_edit_icon);
-
-        addItem.setVisible(false);
-        editItem.setVisible(false);
+        menu.findItem(R.id.menu_add_icon).setVisible(false);
+        menu.findItem(R.id.menu_edit_icon).setVisible(false);
 
         return true;
     }
 
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == R.id.menu_about) {
-            Log.d("TAG","AboutActivity menu_about");
+        Class intentClass = null;
+        boolean commitIntent = true;
+
+        //which btn from the menu was pressed?
+        switch (item.getItemId()){
+            case R.id.menu_about:
+                commitIntent = false;
+                Toast.makeText(this, "you are already here", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.menu_articles:
+                intentClass = ArticlesActivity.class;
+                break;
+            case R.id.menu_car_catalog:
+                intentClass = CarCatalogActivity.class;
+                break;
+            case R.id.menu_login:
+                intentClass = LoginActivity.class;
+                break;
+            case R.id.menu_register:
+                intentClass = RegisterActivity.class;
+                break;
+            case R.id.menu_search:
+                intentClass = AboutActivity.class;
+                break;
+            case R.id.menu_main:
+                commitIntent = false;
+                finish();
+                break;
+            default:
+                throw new RuntimeException("Error id in btn click in the menu of AboutActivity");
         }
-        else if(item.getItemId() == R.id.menu_articles){
-            Log.d("TAG","AboutActivity menu_articles");
-            Intent intent = new Intent(AboutActivity.this,ArticlesActivity.class);
-            startActivity(intent);
-            finish();
-        }
-        else if(item.getItemId() == R.id.menu_car_catalog){
-            Log.d("TAG","AboutActivity menu_car_catalog");
-            Intent intent = new Intent(AboutActivity.this,CarCatalogActivity.class);
-            startActivity(intent);
-            finish();
-        }
-        else if(item.getItemId() == R.id.menu_login){
-            Log.d("TAG","AboutActivity menu_login");
-            Intent intent = new Intent(AboutActivity.this,LoginActivity.class);
-            startActivity(intent);
-            finish();
-        }
-        else if(item.getItemId() == R.id.menu_register){
-            Log.d("TAG","AboutActivity menu_register");
-            Intent intent = new Intent(AboutActivity.this,RegisterActivity.class);
-            startActivity(intent);
-            finish();
-        }
-        else if(item.getItemId() == R.id.menu_search){
-            Log.d("TAG","AboutActivity menu_search");
-            Intent intent = new Intent(AboutActivity.this,SearchActivity.class);
-            startActivity(intent);
-            finish();
-        }
-        else if(item.getItemId() == R.id.menu_main){
-            Log.d("TAG","AboutActivity menu_main");
-            finish();
-        }
+
+        if (commitIntent)
+            commitIntentToActivityAndFinish(intentClass);
         return true;
+    }
+
+    private void commitIntentToActivityAndFinish(Class to)
+    {
+        Intent intent = new Intent(this, to);
+        startActivity(intent);
+        finish();
     }
 }

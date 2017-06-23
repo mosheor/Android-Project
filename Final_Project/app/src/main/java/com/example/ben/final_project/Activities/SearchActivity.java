@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.example.ben.final_project.Fragments.CarDetailsFragment;
 import com.example.ben.final_project.Fragments.CarListSearchFragment;
@@ -33,15 +34,13 @@ public class SearchActivity extends Activity implements SearchFragment.SearchFra
         getActionBar().setDisplayHomeAsUpEnabled(false);
     }
 
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_list, menu);
 
-        MenuItem addItem = menu.findItem(R.id.menu_add_icon);
-        MenuItem editItem = menu.findItem(R.id.menu_edit_icon);
-
-        addItem.setVisible(false);
-        editItem.setVisible(false);
+        menu.findItem(R.id.menu_add_icon).setVisible(false);
+        menu.findItem(R.id.menu_edit_icon).setVisible(false);
 
         return true;
     }
@@ -73,44 +72,49 @@ public class SearchActivity extends Activity implements SearchFragment.SearchFra
         tran.commit();
     }
 
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == R.id.menu_about) {
-            Log.d("TAG","SearchActivity menu_about");
-            Intent intent = new Intent(SearchActivity.this,AboutActivity.class);
-            startActivity(intent);
-            finish();
+        Class intentClass = null;
+        boolean commitIntent = true;
+
+        //which btn from the menu was pressed?
+        switch (item.getItemId()){
+            case R.id.menu_about:
+                intentClass = AboutActivity.class;
+                break;
+            case R.id.menu_articles:
+                intentClass = ArticlesActivity.class;
+                break;
+            case R.id.menu_car_catalog:
+                intentClass = CarCatalogActivity.class;
+                break;
+            case R.id.menu_login:
+                intentClass = LoginActivity.class;
+                break;
+            case R.id.menu_register:
+                intentClass = RegisterActivity.class;
+                break;
+            case R.id.menu_search:
+                commitIntent = false;
+                Toast.makeText(this, "you are already here", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.menu_main:
+                commitIntent = false;
+                finish();
+                break;
+            default:
+                throw new RuntimeException("Error id in btn click in the menu of SearchActivity");
         }
-        else if(item.getItemId() == R.id.menu_articles){
-            Log.d("TAG","SearchActivity menu_articles");
-            Intent intent = new Intent(SearchActivity.this,ArticlesActivity.class);
-            startActivity(intent);
-            finish();
-        }
-        else if(item.getItemId() == R.id.menu_car_catalog){
-            Log.d("TAG","SearchActivity menu_car_catalog");
-            Intent intent = new Intent(SearchActivity.this,CarCatalogActivity.class);
-            startActivity(intent);
-            finish();
-        }
-        else if(item.getItemId() == R.id.menu_login){
-            Log.d("TAG","SearchActivity menu_login");
-            Intent intent = new Intent(SearchActivity.this,LoginActivity.class);
-            startActivity(intent);
-            finish();
-        }
-        else if(item.getItemId() == R.id.menu_register){
-            Log.d("TAG","SearchActivity menu_register");
-            Intent intent = new Intent(SearchActivity.this,LoginActivity.class);
-            startActivity(intent);
-            finish();
-        }
-        else if(item.getItemId() == R.id.menu_search){
-            Log.d("TAG","SearchActivity menu_search");
-        }
-        else if(item.getItemId() == R.id.menu_main){
-            Log.d("TAG","SearchActivity menu_main");
-            finish();
-        }
+
+        if (commitIntent)
+            commitIntentToActivityAndFinish(intentClass);
         return true;
+    }
+
+    private void commitIntentToActivityAndFinish(Class to)
+    {
+        Intent intent = new Intent(this, to);
+        startActivity(intent);
+        finish();
     }
 }

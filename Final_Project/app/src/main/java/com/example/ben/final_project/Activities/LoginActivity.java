@@ -13,7 +13,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.ben.final_project.Model.Model;
-import com.example.ben.final_project.Model.User;
 import com.example.ben.final_project.R;
 
 public class LoginActivity extends Activity {
@@ -25,15 +24,14 @@ public class LoginActivity extends Activity {
 
         final EditText username = (EditText) findViewById(R.id.login_username);
         final EditText password = (EditText) findViewById(R.id.login_password);
-        final Button connectBtn = (Button) findViewById(R.id.Login_sign_in_button);
+        final Button signInButtonBtn = (Button) findViewById(R.id.Login_sign_in_button);
 
-        connectBtn.setOnClickListener(new View.OnClickListener() {
+        signInButtonBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(checkUsername(username)){
-                    if(checkPassword(password,username.getText().toString())){
-                        finish();
-                    }
+                if(Model.instance.isValidUser(username.getText().toString(),password.getText().toString())){
+                    //todo set the user loggrd in!!!
+                    finish();
                 }
                 else{
                     Toast.makeText(LoginActivity.this, "שם משתמש או סיסמה שגויים", Toast.LENGTH_SHORT).show();
@@ -42,65 +40,61 @@ public class LoginActivity extends Activity {
         });
     }
 
-    public static boolean checkUsername(EditText etUsername){
-        if(Model.instance.getUser(etUsername.getText().toString()) != null)
-            return true;
-        return false;
-    }
-
-    public static boolean checkPassword(EditText etPassword,String userName){
-        User user = Model.instance.getUser(userName);
-        if(user != null)
-            if(user.password.compareTo(etPassword.getText().toString()) == 0)
-                return true;
-        return false;
-    }
-
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_list, menu);
 
-        MenuItem addItem = menu.findItem(R.id.menu_add_icon);
-        MenuItem editItem = menu.findItem(R.id.menu_edit_icon);
-
-        addItem.setVisible(false);
-        editItem.setVisible(false);
+        menu.findItem(R.id.menu_add_icon).setVisible(false);
+        menu.findItem(R.id.menu_edit_icon).setVisible(false);
 
         return true;
     }
 
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.menu_about) {
-            Log.d("TAG", "CarCatalogActivity menu_about");
-            Intent intent = new Intent(LoginActivity.this, AboutActivity.class);
-            startActivity(intent);
-            finish();
-        } else if (item.getItemId() == R.id.menu_articles) {
-            Log.d("TAG", "CarCatalogActivity menu_articles");
-            Intent intent = new Intent(LoginActivity.this, ArticlesActivity.class);
-            startActivity(intent);
-            finish();
-        } else if (item.getItemId() == R.id.menu_car_catalog) {
-            Log.d("TAG", "CarCatalogActivity menu_car_catalog");
-            Intent intent = new Intent(LoginActivity.this, CarCatalogActivity.class);
-            startActivity(intent);
-            finish();
-        } else if (item.getItemId() == R.id.menu_login) {
-            Log.d("TAG", "CarCatalogActivity menu_login");
-        } else if (item.getItemId() == R.id.menu_register) {
-            Log.d("TAG", "CarCatalogActivity menu_register");
-            Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
-            startActivity(intent);
-            finish();
-        } else if (item.getItemId() == R.id.menu_search) {
-            Log.d("TAG", "CarCatalogActivity menu_search");
-            Intent intent = new Intent(LoginActivity.this, SearchActivity.class);
-            startActivity(intent);
-            finish();
-        } else if (item.getItemId() == R.id.menu_main) {
-            Log.d("TAG", "CarCatalogActivity menu_main");
-            finish();
+
+        Class intentClass = null;
+        boolean commitIntent = true;
+
+        //which btn from the menu was pressed?
+        switch (item.getItemId()){
+            case R.id.menu_about:
+                intentClass = AboutActivity.class;
+                break;
+            case R.id.menu_articles:
+                intentClass = ArticlesActivity.class;
+                break;
+            case R.id.menu_car_catalog:
+                intentClass = CarCatalogActivity.class;
+                break;
+            case R.id.menu_login:
+                commitIntent = false;
+                Toast.makeText(this, "you are already here", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.menu_register:
+                intentClass = RegisterActivity.class;
+                break;
+            case R.id.menu_search:
+                intentClass = SearchActivity.class;
+                break;
+            case R.id.menu_main:
+                commitIntent = false;
+                finish();
+                break;
+            default:
+                throw new RuntimeException("Error id in btn click in the menu of LoginActivity");
         }
+
+        if (commitIntent)
+            commitIntentToActivityAndFinish(intentClass);
         return true;
+    }
+
+    private void commitIntentToActivityAndFinish(Class to)
+    {
+        Intent intent = new Intent(LoginActivity.this, to);
+        startActivity(intent);
+        finish();
     }
 }

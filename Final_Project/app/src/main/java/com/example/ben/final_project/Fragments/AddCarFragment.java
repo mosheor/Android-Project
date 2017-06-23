@@ -14,11 +14,8 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.example.ben.final_project.Model.Car;
-import com.example.ben.final_project.Model.CarCompany;
 import com.example.ben.final_project.Model.Model;
 import com.example.ben.final_project.R;
-
-import java.util.LinkedList;
 
 public class AddCarFragment extends Fragment {
 
@@ -129,7 +126,7 @@ public class AddCarFragment extends Fragment {
                     car.fuelConsumption = Float.parseFloat(fuelConsumption.getText().toString());
                     car.zeroToHundrend = Float.parseFloat(zeroToHundrend.getText().toString());
                     car.carPicture = picture.getText().toString();
-                    car.companName = companyName.getText().toString();
+                    car.companyName = companyName.getText().toString();
                     car.companyID = companyID;
                     car.description = carDescription.getText().toString();
                     car.engineVolume = Integer.parseInt(engineVolume.getText().toString());

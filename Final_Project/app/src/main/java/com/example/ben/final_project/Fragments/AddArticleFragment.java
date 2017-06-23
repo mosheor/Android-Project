@@ -1,7 +1,6 @@
 package com.example.ben.final_project.Fragments;
 
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
@@ -92,7 +91,7 @@ public class AddArticleFragment extends Fragment {
                     Article article = new Article();
                     article.comments = new LinkedList<Comment>();
                     article.id = newArticleID;
-                    article.published_date = date.getText().toString();
+                    article.publish_date = date.getText().toString();
                     article.author = author.getText().toString();
                     article.mainTitle = mainTitle.getText().toString();
                     article.subTitle = subTitle.getText().toString();
@@ -139,7 +138,7 @@ public class AddArticleFragment extends Fragment {
     }
 
     public interface AddArticleFragmentDelegate {
-        void returnAddResult(int result);//if add new article succeeded - result == 1, else result == 0
+        void returnAddResult(int result);//todo if add new article succeeded - result == 1, else result == 0 -  add static final vars
     }
 
     public int valied(EditText et, String errorMessage){

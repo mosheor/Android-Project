@@ -8,7 +8,7 @@ public class Article {
     public String mainTitle;
     public String subTitle;
     public String author;
-    public String published_date;
+    public String publish_date;
     public String content;
     public List<Comment> comments;
 }

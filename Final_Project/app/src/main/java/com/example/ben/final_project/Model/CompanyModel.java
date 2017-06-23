@@ -26,7 +26,7 @@ public class CompanyModel {
                 Car car = new Car();
                 car.carID = ""+j;
                 car.companyID = ""+i;
-                car.companName = company.name;
+                car.companyName = company.name;
                 car.modelName = "Model number " + j;
                 car.carPicture = "";
                 car.description = "car " + j + "in company " + i;
@@ -168,6 +168,7 @@ public class CompanyModel {
             if (companyId.equals(company.id)) {
                 for(Car car : company.models){
                     if (car.carID.equals(editCar.carID)) {
+                        //car = editCar; // todo check if this line can change all the lines down here??
                         car.modelName = editCar.modelName;
                         car.hp = editCar.hp;
                         car.pollution = editCar.pollution;

@@ -1,5 +1,6 @@
 package com.example.ben.final_project;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Paint;
 import android.support.annotation.Nullable;
@@ -7,6 +8,7 @@ import android.util.AttributeSet;
 import android.widget.TextView;
 
 
+@SuppressLint("AppCompatCustomView")
 public class UnderlinedBoldTextView extends TextView {
     public UnderlinedBoldTextView(Context context) {
         super(context);

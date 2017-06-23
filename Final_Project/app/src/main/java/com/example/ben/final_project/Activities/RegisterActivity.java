@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.ben.final_project.R;
 
@@ -27,16 +28,17 @@ public class RegisterActivity extends Activity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_list, menu);
 
-        MenuItem addItem = menu.findItem(R.id.menu_add_icon);
-        MenuItem editItem = menu.findItem(R.id.menu_edit_icon);
+        menu.findItem(R.id.menu_add_icon).setVisible(false);;
+        menu.findItem(R.id.menu_edit_icon).setVisible(false);;
 
-        final EditText firstNameET = (EditText) findViewById(R.id.register_first_name);
+        //// TODO: not in use yet
+        /*final EditText firstNameET = (EditText) findViewById(R.id.register_first_name);
         final EditText lastNameET = (EditText) findViewById(R.id.register_last_name);
         final EditText birthDateET = (EditText) findViewById(R.id.register_birth_date);
         final EditText usernameET = (EditText) findViewById(R.id.register_username);
         final EditText emailET = (EditText) findViewById(R.id.register_email);
         final EditText passwordET = (EditText) findViewById(R.id.register_password);
-        final EditText passwordValidationET = (EditText) findViewById(R.id.register_password_validation);
+        final EditText passwordValidationET = (EditText) findViewById(R.id.register_password_validation);*/
         final Button registerBTN = (Button)findViewById(R.id.register_save_button);
 
         registerBTN.setOnClickListener(new View.OnClickListener() {
@@ -46,45 +48,51 @@ public class RegisterActivity extends Activity {
             }
         });
 
-
-        addItem.setVisible(false);
-        editItem.setVisible(false);
-
         return true;
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.menu_about) {
-            Log.d("TAG", "CarCatalogActivity menu_about");
-            Intent intent = new Intent(RegisterActivity.this, AboutActivity.class);
-            startActivity(intent);
-            finish();
-        } else if (item.getItemId() == R.id.menu_articles) {
-            Log.d("TAG", "CarCatalogActivity menu_articles");
-            Intent intent = new Intent(RegisterActivity.this, ArticlesActivity.class);
-            startActivity(intent);
-            finish();
-        } else if (item.getItemId() == R.id.menu_car_catalog) {
-            Log.d("TAG", "CarCatalogActivity menu_car_catalog");
-            Intent intent = new Intent(RegisterActivity.this, CarCatalogActivity.class);
-            startActivity(intent);
-            finish();
-        } else if (item.getItemId() == R.id.menu_login) {
-            Log.d("TAG", "CarCatalogActivity menu_login");
-            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-            startActivity(intent);
-            finish();
-        } else if (item.getItemId() == R.id.menu_register) {
-            Log.d("TAG", "CarCatalogActivity menu_register");
-        } else if (item.getItemId() == R.id.menu_search) {
-            Log.d("TAG", "CarCatalogActivity menu_search");
-            Intent intent = new Intent(RegisterActivity.this, SearchActivity.class);
-            startActivity(intent);
-            finish();
-        } else if (item.getItemId() == R.id.menu_main) {
-            Log.d("TAG", "CarCatalogActivity menu_main");
-            finish();
+        Class intentClass = null;
+        boolean commitIntent = true;
+
+        //which btn from the menu was pressed?
+        switch (item.getItemId()){
+            case R.id.menu_about:
+                intentClass = AboutActivity.class;
+                break;
+            case R.id.menu_articles:
+                intentClass = ArticlesActivity.class;
+                break;
+            case R.id.menu_car_catalog:
+                intentClass = CarCatalogActivity.class;
+                break;
+            case R.id.menu_login:
+                intentClass = LoginActivity.class;
+                break;
+            case R.id.menu_register:
+                commitIntent = false;
+                Toast.makeText(this, "you are already here", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.menu_search:
+                intentClass = AboutActivity.class;
+                break;
+            case R.id.menu_main:
+                commitIntent = false;
+                finish();
+                break;
+            default:
+                throw new RuntimeException("Error id in btn click in the menu of RegisterActivity");
         }
+
+        if (commitIntent)
+            commitIntentToActivityAndFinish(intentClass);
         return true;
+    }
+
+    private void commitIntentToActivityAndFinish(Class to)
+    {
+        Intent intent = new Intent(this, to);
+        startActivity(intent);
+        finish();
     }
 }

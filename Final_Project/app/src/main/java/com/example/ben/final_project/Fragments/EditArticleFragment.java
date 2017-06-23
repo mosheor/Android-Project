@@ -12,11 +12,8 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.example.ben.final_project.Model.Article;
-import com.example.ben.final_project.Model.Comment;
 import com.example.ben.final_project.Model.Model;
 import com.example.ben.final_project.R;
-
-import java.util.LinkedList;
 
 
 public class EditArticleFragment extends Fragment {
@@ -75,7 +72,7 @@ public class EditArticleFragment extends Fragment {
         mainTitle.setText(article.mainTitle);
         author.setText(article.author);
         content.setText(article.content);
-        date.setText(article.published_date);
+        date.setText(article.publish_date);
         date.setEnabled(false);
         imageUrl.setText(article.imageUrl);
         subTitle.setText(article.subTitle);
@@ -168,7 +165,7 @@ public class EditArticleFragment extends Fragment {
     }
 
     public interface EditArticleFragmentDelegate {
-        void returnEditResult(int result);//if add new article succed - result == 1, else result == 0
+        void returnEditResult(int result);//todo if add new article succed - result == 1, else result == 0 - add static final vars
     }
 
     public int valied(EditText et, String errorMessage){

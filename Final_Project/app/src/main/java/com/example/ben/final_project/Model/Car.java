@@ -13,12 +13,12 @@ public class Car {
     public String carID;
     public String companyID;
     public String modelName;
-    public String companName;
+    public String companyName;
     public String carPicture;
     public String description;
     public String carCategory;
     public int engineVolume;
-    public int hp;
+    public int hp; // horse powers
     public int pollution;//TODO:in add new company to do in this text 1 from 15 - scala
     public float price;
     public int warranty;

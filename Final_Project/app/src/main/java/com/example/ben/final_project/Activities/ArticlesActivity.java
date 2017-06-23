@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.example.ben.final_project.Fragments.AddArticleFragment;
 import com.example.ben.final_project.Fragments.ArticleDetailesFragment;
@@ -55,97 +56,97 @@ public class ArticlesActivity extends Activity implements ArticlesListFragment.A
         addItem.setVisible(false);
     }
 
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_list, menu);
 
-        MenuItem addItem = menu.findItem(R.id.menu_add_icon);
-        this.addItem = addItem;
-        MenuItem editItem = menu.findItem(R.id.menu_edit_icon);
-        this.editItem = editItem;
+        this.addItem = menu.findItem(R.id.menu_add_icon);
+        this.addItem.setVisible(true);
+        this.editItem = menu.findItem(R.id.menu_edit_icon);
+        this.editItem.setVisible(false);
 
-        addItem.setVisible(true);
-        editItem.setVisible(false);
-
-        return true;
-    }
-
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == R.id.menu_about) {
-            Log.d("TAG","ArticlesActivity menu_about");
-            Intent intent = new Intent(ArticlesActivity.this,AboutActivity.class);
-            startActivity(intent);
-            finish();
-        }
-        else if(item.getItemId() == R.id.menu_articles){
-            Log.d("TAG","ArticlesActivity menu_articles");
-            articlesListFragment = new ArticlesListFragment();
-            articlesListFragment.setDelegate(this);
-
-            FragmentTransaction tran = getFragmentManager().beginTransaction();
-            tran.replace(R.id.frame_fragment_articles, articlesListFragment);
-            tran.commit();
-        }
-        else if(item.getItemId() == R.id.menu_car_catalog){
-            Log.d("TAG","ArticlesActivity menu_car_catalog");
-            Intent intent = new Intent(ArticlesActivity.this,CarCatalogActivity.class);
-            startActivity(intent);
-            finish();
-        }
-        else if(item.getItemId() == R.id.menu_login){
-            Log.d("TAG","ArticlesActivity menu_login");
-            Intent intent = new Intent(ArticlesActivity.this,LoginActivity.class);
-            startActivity(intent);
-            finish();
-        }
-        else if(item.getItemId() == R.id.menu_register){
-            Log.d("TAG","ArticlesActivity menu_register");
-            Intent intent = new Intent(ArticlesActivity.this,RegisterActivity.class);
-            startActivity(intent);
-            finish();
-        }
-        else if(item.getItemId() == R.id.menu_search){
-            Log.d("TAG","ArticlesActivity menu_search");
-            Intent intent = new Intent(ArticlesActivity.this,SearchActivity.class);
-            startActivity(intent);
-            finish();
-        }
-        else if(item.getItemId() == R.id.menu_main){
-            Log.d("TAG","ArticlesActivity menu_main");
-            finish();
-        }
-        else if(item.getItemId() == R.id.menu_add_icon){
-            Log.d("TAG","ArticlesActivity menu_add_icon");
-            AddArticleFragment addArticleFragment = new AddArticleFragment();
-            int articlesListSize = Model.instance.getArticleListSize();
-            addArticleFragment = addArticleFragment.newInstance(String.valueOf(articlesListSize));
-            addArticleFragment.setDelegate(this);
-
-            FragmentTransaction tran = getFragmentManager().beginTransaction();
-            tran.replace(R.id.frame_fragment_articles, addArticleFragment);
-            tran.commit();
-
-            item.setVisible(false);
-        }
-        else if(item.getItemId() == R.id.menu_edit_icon){
-            Log.d("TAG","ArticlesActivity menu_add_icon");
-            EditArticleFragment editArticleFragment = new EditArticleFragment();
-            Log.d("TAG","ArticlesActivity edit id " + clickedArticleID);
-            editArticleFragment = editArticleFragment.newInstance(String.valueOf(clickedArticleID));
-            editArticleFragment.setDelegate(this);
-
-            FragmentTransaction tran = getFragmentManager().beginTransaction();
-            tran.replace(R.id.frame_fragment_articles, editArticleFragment);
-            tran.commit();
-
-            item.setVisible(false);
-        }
         return true;
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Class intentClass = null;
+        boolean commitIntent = true;
+        FragmentTransaction tran;
+
+        //which btn from the menu was pressed?
+        switch (item.getItemId()){
+            case R.id.menu_about:
+                intentClass = AboutActivity.class;
+                break;
+            case R.id.menu_articles:
+                commitIntent = false;
+                articlesListFragment = new ArticlesListFragment();
+                articlesListFragment.setDelegate(this);
+                tran = getFragmentManager().beginTransaction();
+                tran.replace(R.id.frame_fragment_articles, articlesListFragment);
+                tran.commit();
+                break;
+            case R.id.menu_car_catalog:
+                intentClass = CarCatalogActivity.class;
+                break;
+            case R.id.menu_login:
+                intentClass = LoginActivity.class;
+                break;
+            case R.id.menu_register:
+                intentClass = RegisterActivity.class;
+                break;
+            case R.id.menu_search:
+                intentClass = AboutActivity.class;
+                break;
+            case R.id.menu_main:
+                commitIntent = false;
+                finish();
+                break;
+            case R.id.menu_edit_icon:
+                EditArticleFragment editArticleFragment = new EditArticleFragment();
+                Log.d("TAG","ArticlesActivity edit id " + clickedArticleID);
+                editArticleFragment = editArticleFragment.newInstance(String.valueOf(clickedArticleID));
+                editArticleFragment.setDelegate(this);
+
+                tran = getFragmentManager().beginTransaction();
+                tran.replace(R.id.frame_fragment_articles, editArticleFragment);
+                tran.commit();
+
+                item.setVisible(false);
+                break;
+            case R.id.menu_add_icon:
+                AddArticleFragment addArticleFragment = new AddArticleFragment();
+                int articlesListSize = Model.instance.getArticleListSize();
+                addArticleFragment = addArticleFragment.newInstance(String.valueOf(articlesListSize));
+                addArticleFragment.setDelegate(this);
+
+                tran = getFragmentManager().beginTransaction();
+                tran.replace(R.id.frame_fragment_articles, addArticleFragment);
+                tran.commit();
+
+                item.setVisible(false);
+                break;
+            default:
+                throw new RuntimeException("Error id in btn click in the menu of ArticlesActivity");
+        }
+
+        if (commitIntent)
+            commitIntentToActivityAndFinish(intentClass);
+        return true;
+    }
+
+    private void commitIntentToActivityAndFinish(Class to)
+    {
+        Intent intent = new Intent(this, to);
+        startActivity(intent);
+        finish();
+    }
+
+    @Override
     public void returnAddResult(int result) {
-        if(result == 1)
+        if(result == 1) // todo ???
             Log.d("TAG", "add new article succeded");
         else
             Log.d("TAG","add new article did not succed - cancle or faild");
@@ -156,13 +157,13 @@ public class ArticlesActivity extends Activity implements ArticlesListFragment.A
         FragmentTransaction tran = getFragmentManager().beginTransaction();
         tran.replace(R.id.frame_fragment_articles, articlesListFragment);
         tran.commit();
-        MenuInflater inflater = getMenuInflater();
+        //MenuInflater inflater = getMenuInflater(); // todo not in use ???
         addItem.setVisible(true);
     }
 
     @Override
     public void returnEditResult(int result) {
-        if(result == 1)
+        if(result == 1) // todo ???
             Log.d("TAG", "edit article succeded");
         else if(result == 2)
             Log.d("TAG", "delete article succeded");

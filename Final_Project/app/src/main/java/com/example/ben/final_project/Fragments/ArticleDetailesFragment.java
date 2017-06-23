@@ -9,7 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
@@ -77,7 +76,7 @@ public class ArticleDetailesFragment extends Fragment {
         mainTitle.setText(articleData.mainTitle);
         subTitle.setText(articleData.subTitle);
         author.setText(articleData.author);
-        publishedDate.setText(articleData.published_date);
+        publishedDate.setText(articleData.publish_date);
         content.setText(articleData.content);
 
         setListViewHeightBasedOnChildren(commentsList);
