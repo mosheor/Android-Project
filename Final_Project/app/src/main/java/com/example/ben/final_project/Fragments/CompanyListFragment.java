@@ -1,6 +1,7 @@
 package com.example.ben.final_project.Fragments;
 
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
@@ -14,11 +15,15 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.example.ben.final_project.Activities.FragmentsDelegate;
 import com.example.ben.final_project.Model.CarCompany;
 import com.example.ben.final_project.Model.Model;
 import com.example.ben.final_project.R;
 
 import java.util.List;
+
+import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALOG_CAR_LIST;
+import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALOG_COMPANY_DETAILS;
 
 
 public class CompanyListFragment extends Fragment {
@@ -26,24 +31,20 @@ public class CompanyListFragment extends Fragment {
     ListView list;
     List<CarCompany> companiesData = Model.instance.getAllCompanies();
     CompanyListAdapter adapter;
-    CompanyListFragmentDelegate listener;
+    FragmentsDelegate listener;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d("TAG","CompanyListFragment onCreateView");
         View containerView = inflater.inflate(R.layout.fragment_companies_list, container, false);
-
-        Log.d("TAG","com size = " + Model.instance.getAllCompanies().size());
-
         adapter = new CompanyListAdapter();
         adapter.setInflater(inflater);
         list = (ListView) containerView.findViewById(R.id.frag_companies_list);
         list.setAdapter(adapter);
-
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                listener.selectModelDetailsClick(companiesData.get(position).id);
+                listener.onAction(CATALOG_CAR_LIST,companiesData.get(position).id);
             }
         });
 
@@ -53,8 +54,21 @@ public class CompanyListFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof CompanyListFragmentDelegate) {
-            listener = (CompanyListFragmentDelegate) context;
+        Log.d("TAG", "on attach CompanyListFragment - context");
+        if (context instanceof FragmentsDelegate) {
+            listener = (FragmentsDelegate) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
+    }
+
+    @Override
+    public void onAttach(Activity context) {
+        super.onAttach(context);
+        Log.d("TAG", "on attach CompanyListFragment - activity");
+        if (context instanceof FragmentsDelegate) {
+            listener = (FragmentsDelegate) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -67,12 +81,7 @@ public class CompanyListFragment extends Fragment {
         listener = null;
     }
 
-    public interface CompanyListFragmentDelegate{
-        void selectModelDetailsClick(String id);
-        void selectCompanyDetailsClick(String id);
-    }
-
-    public void setDelegate(CompanyListFragmentDelegate listener){
+    public void setDelegate(FragmentsDelegate listener){
         this.listener = listener;
     }
 
@@ -106,17 +115,13 @@ public class CompanyListFragment extends Fragment {
 
             ImageView companyLogo = (ImageView) convertView.findViewById(R.id.row_company_or_car_logo);
             TextView companyName = (TextView) convertView.findViewById(R.id.row_company_or_car_name);
-
             CarCompany company= companiesData.get(position);
-            companyLogo.setImageResource(R.drawable.audi_logo);
+            companyLogo.setImageResource(R.drawable.audi_logo);//TODO:current company logo
             companyName.setText(company.name);
-
-            Log.d("TAG","comp num" + position);
-
             companyLogo.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    listener.selectCompanyDetailsClick(companiesData.get(position).id);
+                    listener.onAction(CATALOG_COMPANY_DETAILS,companiesData.get(position).id);
                 }
             });
             return convertView;

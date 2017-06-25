@@ -1,6 +1,7 @@
 package com.example.ben.final_project.Fragments;
 
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
@@ -87,6 +88,17 @@ public class SearchFragment extends Fragment {
 
     @Override
     public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof SearchFragmentDelegate) {
+            listener = (SearchFragmentDelegate) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
+    }
+
+    @Override
+    public void onAttach(Activity context) {
         super.onAttach(context);
         if (context instanceof SearchFragmentDelegate) {
             listener = (SearchFragmentDelegate) context;

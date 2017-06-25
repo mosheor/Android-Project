@@ -1,6 +1,7 @@
 package com.example.ben.final_project.Fragments;
 
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.example.ben.final_project.Activities.FragmentsDelegate;
 import com.example.ben.final_project.Model.Car;
 import com.example.ben.final_project.Model.CarCompany;
 import com.example.ben.final_project.Model.Model;
@@ -21,16 +23,17 @@ import com.example.ben.final_project.R;
 
 import java.util.List;
 
+import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALOG_CAR_DETAILS;
+
 public class CarListFragment extends Fragment {
 
     private static final String ARG_PARAM1 = "param1";//company id
-    private String mParam1;
-
+    private String companyId;
     ListView list;
     List<Car> carsData;
     CarCompany company;
     CarListAdapter adapter;
-    CarListFragmentDelegate listener;
+    FragmentsDelegate listener;
 
     public static CarListFragment newInstance(String param1) {
         CarListFragment fragment = new CarListFragment();
@@ -44,7 +47,7 @@ public class CarListFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
+            companyId = getArguments().getString(ARG_PARAM1);
         }
     }
 
@@ -52,27 +55,21 @@ public class CarListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d("TAG","CompanyListFragment onCreateView");
         View containerView = inflater.inflate(R.layout.fragment_cars_list, container, false);
-
-        company = Model.instance.getCompany(mParam1);
-        carsData = Model.instance.getCompanyModels(mParam1);
-
-        Log.d("TAG","cars size = " + carsData.size());
-
+        company = Model.instance.getCompany(companyId);
+        carsData = Model.instance.getCompanyModels(companyId);
         adapter = new CarListAdapter();
         adapter.setInflater(inflater);
-
         TextView companyNameTW = (TextView) containerView.findViewById(R.id.car_list_company_name);
         ImageView companyImage = (ImageView) containerView.findViewById(R.id.car_list_company_image);
         list = (ListView) containerView.findViewById(R.id.frag_cars_list);
         list.setAdapter(adapter);
-
         companyNameTW.setText(company.name);
         companyImage.setImageResource(R.drawable.bugatti);//TODO:change to current company
 
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                listener.selectCarDetilesClick(carsData.get(position).carID);
+                listener.onAction(CATALOG_CAR_DETAILS,carsData.get(position).carID);
             }
         });
 
@@ -82,8 +79,19 @@ public class CarListFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof CarListFragmentDelegate) {
-            listener = (CarListFragmentDelegate) context;
+        if (context instanceof FragmentsDelegate) {
+            listener = (FragmentsDelegate) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
+    }
+
+    @Override
+    public void onAttach(Activity context) {
+        super.onAttach(context);
+        if (context instanceof FragmentsDelegate) {
+            listener = (FragmentsDelegate) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -96,11 +104,7 @@ public class CarListFragment extends Fragment {
         listener = null;
     }
 
-    public interface CarListFragmentDelegate{
-        void selectCarDetilesClick(String id);
-    }
-
-    public void setDelegate(CarListFragmentDelegate listener){
+    public void setDelegate(FragmentsDelegate listener){
         this.listener = listener;
     }
 
@@ -134,19 +138,10 @@ public class CarListFragment extends Fragment {
 
             ImageView companyLogo = (ImageView) convertView.findViewById(R.id.row_company_or_car_logo);
             TextView companyName = (TextView) convertView.findViewById(R.id.row_company_or_car_name);
-
             Car car= carsData.get(position);
             companyLogo.setImageResource(R.drawable.car);
             companyName.setText(car.modelName);
-
-            Log.d("TAG","car num" + position);
             return convertView;
         }
     }
-
-    public void notifyAdapter(){
-        adapter.notifyDataSetChanged();
-    }
-
-
 }

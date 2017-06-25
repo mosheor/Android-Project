@@ -1,5 +1,6 @@
 package com.example.ben.final_project.Fragments;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
@@ -13,11 +14,14 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.example.ben.final_project.Activities.FragmentsDelegate;
 import com.example.ben.final_project.Model.Article;
 import com.example.ben.final_project.Model.Model;
 import com.example.ben.final_project.R;
 
 import java.util.List;
+
+import static com.example.ben.final_project.Activities.ArticlesActivity.ARTICLE_DETAILS;
 
 
 public class ArticlesListFragment extends Fragment{
@@ -25,7 +29,7 @@ public class ArticlesListFragment extends Fragment{
     ListView list;
     List<Article> articlesData = Model.instance.getAllArticles();
     ArticleListAdapter adapter;
-    ArticlesListFragmentDelegate listener;
+    FragmentsDelegate listener;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -39,7 +43,10 @@ public class ArticlesListFragment extends Fragment{
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                listener.selectDetilesClick(articlesData.get(position).id);
+                if (listener != null)
+                    listener.onAction(ARTICLE_DETAILS,articlesData.get(Model.instance.getArticleListSize() - position - 1).id);
+                else
+                    Log.d("TAG", "listener is null");
             }
         });
 
@@ -47,13 +54,26 @@ public class ArticlesListFragment extends Fragment{
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        Log.d("TAG", "on atach ArticlesListFragment - activity");
+        if (activity instanceof FragmentsDelegate) {
+            listener = (FragmentsDelegate) activity;
+        } else {
+            throw new RuntimeException(activity.toString()
+                    + " must implement FragmentsDelegate");
+        }
+    }
+
+    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof ArticlesListFragmentDelegate) {
-            listener = (ArticlesListFragmentDelegate) context;
+        Log.d("TAG", "on atach ArticlesListFragment - context");
+        if (context instanceof FragmentsDelegate) {
+            listener = (FragmentsDelegate) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement FragmentsDelegate");
         }
     }
 
@@ -63,11 +83,7 @@ public class ArticlesListFragment extends Fragment{
         listener = null;
     }
 
-    public interface ArticlesListFragmentDelegate{
-        void selectDetilesClick(String id);
-    }
-
-    public void setDelegate(ArticlesListFragmentDelegate d){
+    public void setDelegate(FragmentsDelegate d){
         this.listener = d;
     }
 
@@ -109,9 +125,5 @@ public class ArticlesListFragment extends Fragment{
 
             return convertView;
         }
-    }
-
-    public void notifyAdapter(){
-        adapter.notifyDataSetChanged();
     }
 }

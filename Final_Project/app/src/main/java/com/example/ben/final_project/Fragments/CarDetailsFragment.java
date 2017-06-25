@@ -1,6 +1,7 @@
 package com.example.ben.final_project.Fragments;
 
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.ben.final_project.Activities.FragmentsDelegate;
 import com.example.ben.final_project.Model.Car;
 import com.example.ben.final_project.Model.Model;
 import com.example.ben.final_project.R;
@@ -18,16 +20,10 @@ import com.example.ben.final_project.R;
 public class CarDetailsFragment extends Fragment {
 
     private static final String ARG_PARAM1 = "param1";//companyID
-    private String mParam1;
+    private String companyID;
     private static final String ARG_PARAM2 = "param2";//carID
-    private String mParam2;
+    private String carID;
     Car carData;
-
-    private CarDetailesFragmentDelegate listener;
-
-    public void setDelegate(CarDetailesFragmentDelegate l){
-        this.listener = l;
-    }
 
     public static CarDetailsFragment newInstance(String param1,String param2) {
         CarDetailsFragment fragment = new CarDetailsFragment();
@@ -42,8 +38,8 @@ public class CarDetailsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            companyID = getArguments().getString(ARG_PARAM1);
+            carID = getArguments().getString(ARG_PARAM2);
         }
     }
 
@@ -52,7 +48,7 @@ public class CarDetailsFragment extends Fragment {
         Log.d("TAG","CarDetailsFragment onCreateView");
         View containerView = inflater.inflate(R.layout.fragment_car_details, container, false);
 
-        carData = Model.instance.getCar(mParam1,mParam2);
+        carData = Model.instance.getCar(companyID, carID);
 
         ImageView carPic = (ImageView) containerView.findViewById(R.id.car_details_image);
         TextView description = (TextView) containerView.findViewById(R.id.car_details_description);
@@ -79,23 +75,9 @@ public class CarDetailsFragment extends Fragment {
         return containerView;
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof CarDetailesFragmentDelegate) {
-            listener = (CarDetailesFragmentDelegate) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        listener = null;
-    }
-
-    public interface CarDetailesFragmentDelegate {
     }
 }

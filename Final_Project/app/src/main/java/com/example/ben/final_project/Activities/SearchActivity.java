@@ -11,11 +11,11 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.example.ben.final_project.Fragments.CarDetailsFragment;
-import com.example.ben.final_project.Fragments.CarListSearchFragment;
+import com.example.ben.final_project.Fragments.SearchCarListResultFragment;
 import com.example.ben.final_project.Fragments.SearchFragment;
 import com.example.ben.final_project.R;
 
-public class SearchActivity extends Activity implements SearchFragment.SearchFragmentDelegate, CarListSearchFragment.CarListSearchFragmentDelegate {
+public class SearchActivity extends Activity implements SearchFragment.SearchFragmentDelegate, SearchCarListResultFragment.CarListSearchFragmentDelegate {
 
     SearchFragment searchFragment;
 
@@ -49,26 +49,26 @@ public class SearchActivity extends Activity implements SearchFragment.SearchFra
     public void filterSelection(String category, String companyId, int engineVolumeNumberCond, int hpNumberCond) {
         Log.d("TAG","SearchActivity filterSelection");
 
-        CarListSearchFragment carListSearchFragment = CarListSearchFragment.newInstance(
+        SearchCarListResultFragment carListSearchFragment = SearchCarListResultFragment.newInstance(
                 category,companyId,String.valueOf(engineVolumeNumberCond),String.valueOf(hpNumberCond));
-        carListSearchFragment.setDelegate(this);
 
         FragmentTransaction tran = getFragmentManager().beginTransaction();
         tran.replace(R.id.frame_fragment_search, carListSearchFragment);
+        tran.addToBackStack("searchToSearchResults");
         tran.commit();
         getActionBar().setDisplayHomeAsUpEnabled(false);
     }
 
     @Override
-    public void selectCarDetilesClick(String companyId,String carId) {
-        Log.d("TAG","SearchActivity selectCarDetilesClick");
+    public void selectCarDetailsClick(String companyId, String carId) {
+        Log.d("TAG","SearchActivity selectCarDetailsClick");
 
         CarDetailsFragment carDetailsFragment = new CarDetailsFragment();
         carDetailsFragment = carDetailsFragment.newInstance(companyId,carId);
-        //carDetailsFragment.setDelegate(this);
 
         FragmentTransaction tran = getFragmentManager().beginTransaction();
         tran.replace(R.id.frame_fragment_search, carDetailsFragment);
+        tran.addToBackStack("SearchResultsToCarDetails");
         tran.commit();
     }
 
