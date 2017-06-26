@@ -22,8 +22,8 @@ import com.example.ben.final_project.R;
 import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALOG_CAR_ADD;
 
 public class CarAddFragment extends Fragment {
-    private static final String ARG_PARAM1 = "param1";//company id
-    private static final String ARG_PARAM2 = "param2";//last car id
+    private static final String ARG_PARAM1 = "param1";//company articleID
+    private static final String ARG_PARAM2 = "param2";//last car articleID
     private String companyId;
     private String carId;
     private FragmentsDelegate listener;

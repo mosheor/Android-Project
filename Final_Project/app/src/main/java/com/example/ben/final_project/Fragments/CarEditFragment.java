@@ -22,9 +22,9 @@ import com.example.ben.final_project.R;
 import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALOG_CAR_EDIT;
 
 public class CarEditFragment extends Fragment {
-    private static final String ARG_PARAM1 = "param1";//company id
+    private static final String ARG_PARAM1 = "param1";//company articleID
     private String companyId;
-    private static final String ARG_PARAM2 = "param2";//car id
+    private static final String ARG_PARAM2 = "param2";//car articleID
     private String carId;
     Car car;
     private FragmentsDelegate listener;
@@ -59,8 +59,8 @@ public class CarEditFragment extends Fragment {
         final String companyID = companyId;
         final String carID = carId;
 
-        Log.d("TAG","company id = " + companyID );
-        Log.d("TAG","new car id = " + carID );
+        Log.d("TAG","company articleID = " + companyID );
+        Log.d("TAG","new car articleID = " + carID );
 
         Button saveButton = (Button) containerView.findViewById(R.id.edit_car_save_button);
         Button cancelButton = (Button) containerView.findViewById(R.id.edit_car_cancel_button);

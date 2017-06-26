@@ -17,11 +17,14 @@ import com.example.ben.final_project.Model.Article;
 import com.example.ben.final_project.Model.Model;
 import com.example.ben.final_project.R;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import static com.example.ben.final_project.Activities.ArticlesActivity.ARTICLE_EDIT;
 
 
 public class ArticleEditFragment extends Fragment {
-    private static final String ARG_PARAM1 = "param1";//article id
+    private static final String ARG_PARAM1 = "param1";//article articleID
     private String mParam1;
     Article article;
     private FragmentsDelegate listener;
@@ -63,15 +66,29 @@ public class ArticleEditFragment extends Fragment {
         final EditText subTitle = (EditText) containerView.findViewById(R.id.edit_article_sub_title);
 
         article = new Article();
-        article = Model.instance.getArticle(mParam1);
+        Model.instance.getArticle(mParam1, new Model.GetArticleCallback() {
+            @Override
+            public void onComplete(Article article) {
+                ArticleEditFragment.this.article = article;
+                mainTitle.setText(article.mainTitle);
+                author.setText(article.author);
+                content.setText(article.content);
 
-        mainTitle.setText(article.mainTitle);
-        author.setText(article.author);
-        content.setText(article.content);
-        date.setText(article.publish_date);
-        date.setEnabled(false);
-        imageUrl.setText(article.imageUrl);
-        subTitle.setText(article.subTitle);
+                SimpleDateFormat sfd = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+                Log.d("TAG","article date = " + sfd.format(new Date((long)article.publishDate + 3600000 * 7)));
+
+                date.setText(sfd.format(new Date((long)article.publishDate + 3600000 * 7)));
+                date.setEnabled(false);
+                date.setEnabled(false);
+                imageUrl.setText(article.imageUrl);
+                subTitle.setText(article.subTitle);
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+        });
 
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -107,8 +124,8 @@ public class ArticleEditFragment extends Fragment {
                     article.imageUrl = imageUrl.getText().toString();
                     article.content = content.getText().toString();
 
-                    if(Model.instance.editArticle(article))
-                        listener.onAction(ARTICLE_EDIT,null);
+                    Model.instance.editArticle(article);
+                    listener.onAction(ARTICLE_EDIT,null);
                 }
                 else{
                     Log.d("TAG","ArticleAddFragment did not save edited article");
@@ -129,13 +146,9 @@ public class ArticleEditFragment extends Fragment {
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(Model.instance.removeArticle(article.id) == true){
-                    Log.d("TAG","ArticleAddFragment Delete article");
-                    listener.onAction(ARTICLE_EDIT,null);
-                }
-                else{
-                    Log.d("TAG","ArticleAddFragment Delete article did not succed");
-                }
+                Model.instance.removeArticle(article);
+                Log.d("TAG","ArticleAddFragment Delete article");
+                listener.onAction(ARTICLE_EDIT,null);
             }
         });
 

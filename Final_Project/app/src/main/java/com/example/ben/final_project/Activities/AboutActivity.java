@@ -60,7 +60,7 @@ public class AboutActivity extends Activity {
                 finish();
                 break;
             default:
-                throw new RuntimeException("Error id in btn click in the menu of AboutActivity");
+                throw new RuntimeException("Error articleID in btn click in the menu of AboutActivity");
         }
 
         if (commitIntent)

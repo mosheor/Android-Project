@@ -27,7 +27,7 @@ import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALO
 
 public class CarListFragment extends Fragment {
 
-    private static final String ARG_PARAM1 = "param1";//company id
+    private static final String ARG_PARAM1 = "param1";//company articleID
     private String companyId;
     ListView list;
     List<Car> carsData;

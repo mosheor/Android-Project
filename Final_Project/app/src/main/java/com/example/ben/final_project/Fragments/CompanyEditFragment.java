@@ -20,7 +20,7 @@ import com.example.ben.final_project.R;
 import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALOG_COMPANY_EDIT;
 
 public class CompanyEditFragment extends Fragment {
-    private static final String ARG_PARAM1 = "param1";//company id
+    private static final String ARG_PARAM1 = "param1";//company articleID
     private String companyId;
     CarCompany company;
     private FragmentsDelegate listener;

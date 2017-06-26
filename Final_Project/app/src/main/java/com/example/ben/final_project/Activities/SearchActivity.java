@@ -103,7 +103,7 @@ public class SearchActivity extends Activity implements SearchFragment.SearchFra
                 finish();
                 break;
             default:
-                throw new RuntimeException("Error id in btn click in the menu of SearchActivity");
+                throw new RuntimeException("Error articleID in btn click in the menu of SearchActivity");
         }
 
         if (commitIntent)

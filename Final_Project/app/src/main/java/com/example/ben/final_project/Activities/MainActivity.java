@@ -2,7 +2,10 @@ package com.example.ben.final_project.Activities;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -15,6 +18,7 @@ import com.example.ben.final_project.R;
 
 public class MainActivity extends Activity {
 
+    static final int REQUEST_WRITE_STORAGE = 11;
     private int i;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +51,7 @@ public class MainActivity extends Activity {
                         intentClass = SearchActivity.class;
                         break;
                     default:
-                        throw new RuntimeException("Error id in btn click in MainActivity");
+                        throw new RuntimeException("Error articleID in btn click in MainActivity");
                 }
 
                 commitIntentToActivity(intentClass);
@@ -59,6 +63,14 @@ public class MainActivity extends Activity {
         about_btn.setOnClickListener(onClickListener);
         catalog_btn.setOnClickListener(onClickListener);
         search_btn.setOnClickListener(onClickListener);
+
+        boolean hasPermission = (ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE) ==
+                PackageManager.PERMISSION_GRANTED);
+        if (!hasPermission) {
+            ActivityCompat.requestPermissions(this,new String[]{
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_STORAGE);
+        }
     }
 
     private void commitIntentToActivity(Class to)
@@ -108,7 +120,7 @@ public class MainActivity extends Activity {
                 Toast.makeText(this, "you are already here", Toast.LENGTH_SHORT).show();
                 break;
             default:
-                throw new RuntimeException("Error id in btn click in the menu of MainActivity");
+                throw new RuntimeException("Error articleID in btn click in the menu of MainActivity");
         }
 
         if (commitIntent)

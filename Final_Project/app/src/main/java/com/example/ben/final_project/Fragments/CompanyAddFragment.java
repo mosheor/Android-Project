@@ -23,7 +23,7 @@ import java.util.LinkedList;
 import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALOG_COMPANY_ADD;
 
 public class CompanyAddFragment extends Fragment {
-    private static final String ARG_PARAM1 = "param1";//last company id
+    private static final String ARG_PARAM1 = "param1";//last company articleID
     private String lastCompanyId;
     private FragmentsDelegate listener;
 

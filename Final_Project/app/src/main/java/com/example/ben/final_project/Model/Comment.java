@@ -6,6 +6,8 @@ package com.example.ben.final_project.Model;
 
 public class Comment {
     public String author;
-    public String date;
     public String commentContent;
+    public String articleID;
+    public String commentID;
+    public double lastUpdatedDate;
 }

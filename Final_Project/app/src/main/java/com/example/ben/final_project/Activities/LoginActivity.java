@@ -83,7 +83,7 @@ public class LoginActivity extends Activity {
                 finish();
                 break;
             default:
-                throw new RuntimeException("Error id in btn click in the menu of LoginActivity");
+                throw new RuntimeException("Error articleID in btn click in the menu of LoginActivity");
         }
 
         if (commitIntent)

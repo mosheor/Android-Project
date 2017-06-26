@@ -23,7 +23,7 @@ import java.util.LinkedList;
 import static com.example.ben.final_project.Activities.ArticlesActivity.ARTICLE_ADD;
 
 public class ArticleAddFragment extends Fragment {
-    private static final String ARG_PARAM1 = "param1";//last article id
+    private static final String ARG_PARAM1 = "param1";//last article articleID
     private String mParam1;
     private FragmentsDelegate listener;
 
@@ -53,17 +53,17 @@ public class ArticleAddFragment extends Fragment {
         View containerView = inflater.inflate(R.layout.fragment_add_article, container, false);
 
         final String newArticleID;
-        if(Integer.parseInt(mParam1) > 0)
-            newArticleID = Model.instance.getAllArticles().get(Integer.parseInt(mParam1) - 1).id + 1;
+        /*if(Integer.parseInt(mParam1) > 0)
+            newArticleID = Model.instance.getAllArticles().get(Integer.parseInt(mParam1) - 1).articleID + 1;
         else
-            newArticleID = "0";
+            newArticleID = "0";*/
 
         Button saveButton = (Button) containerView.findViewById(R.id.add_article_save_button);
         Button cancelButton = (Button) containerView.findViewById(R.id.add_article_cancel_button);
         final EditText mainTitle = (EditText) containerView.findViewById(R.id.add_article_main_title);
         final EditText author = (EditText) containerView.findViewById(R.id.add_article_author);
         final EditText content = (EditText) containerView.findViewById(R.id.add_article_content);
-        final EditText date = (EditText) containerView.findViewById(R.id.add_article_date);
+        //final EditText date = (EditText) containerView.findViewById(R.id.add_article_date);
         final EditText imageUrl = (EditText) containerView.findViewById(R.id.add_article_image);
         final EditText subTitle = (EditText) containerView.findViewById(R.id.add_article_sub_title);
 
@@ -78,25 +78,27 @@ public class ArticleAddFragment extends Fragment {
                 ok += valid(mainTitle,"Main title is required!");//TODO:write errors in hebrew
                 ok += valid(author,"Author name is required!");
                 ok += valid(content,"Content is required!");
-                ok += valid(date,"Date is required!");
+                //ok += valid(date,"Date is required!");
                 ok += valid(imageUrl,"Image is required!");
                 ok += valid(subTitle,"Sub title is required!");
 
-                if(ok != 6)
+                if(ok != 5)
                     save = false;
 
                 if(save == true) {
                     Article article = new Article();
                     article.comments = new LinkedList<Comment>();
-                    article.id = newArticleID;
-                    article.publish_date = date.getText().toString();
+                    article.articleID = Model.random();
+                    article.publishDate = 0;
                     article.author = author.getText().toString();
                     article.mainTitle = mainTitle.getText().toString();
                     article.subTitle = subTitle.getText().toString();
                     article.imageUrl = imageUrl.getText().toString();
                     article.content = content.getText().toString();
+                    article.wasDeleted = false;
 
                     Model.instance.addNewArticle(article);
+                    //progressBar.setVisibility(GONE);
                     listener.onAction(ARTICLE_ADD,null);
                 }
                 else{

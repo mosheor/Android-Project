@@ -2,7 +2,6 @@ package com.example.ben.final_project.Fragments;
 
 
 import android.app.Fragment;
-import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,19 +13,48 @@ import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.ben.final_project.Model.Article;
 import com.example.ben.final_project.Model.Comment;
 import com.example.ben.final_project.Model.Model;
 import com.example.ben.final_project.R;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+
 public class ArticleDetailsFragment extends Fragment {
 
     private static final String ARG_PARAM1 = "param1";
-    private String mParam1;
+    private String articleId;
     CommentsListAdapter adapter;
-    Article articleData;
+    Article articleData = new Article();
     ListView commentsList;
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMessageEvent(Model.UpdateCommentEvent event) {
+        Toast.makeText(getActivity(), "got new comment event", Toast.LENGTH_SHORT).show();
+        Log.d("TAG","new comment");
+        boolean exist = false;
+        for (Comment comment : articleData.comments) {
+            if (comment.articleID.equals(event.comment.articleID) && comment.commentID.equals(event.comment.commentID)) {
+                comment = event.comment;
+                exist = true;
+                break;
+            }
+        }
+        if (!exist && articleId.equals(event.comment.articleID)) {
+            articleData.comments.add(event.comment);
+        }
+        adapter.notifyDataSetChanged();
+        commentsList.setSelection(0);
+    }
 
     public static ArticleDetailsFragment newInstance(String param1) {
         ArticleDetailsFragment fragment = new ArticleDetailsFragment();
@@ -39,8 +67,9 @@ public class ArticleDetailsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EventBus.getDefault().register(this);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
+            articleId = getArguments().getString(ARG_PARAM1);
         }
     }
 
@@ -48,13 +77,6 @@ public class ArticleDetailsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d("TAG","ArticleDetailsFragment onCreateView");
         View containerView = inflater.inflate(R.layout.fragment_articles_detailes, container, false);
-
-        articleData = Model.instance.getArticle(mParam1);
-
-        adapter = new CommentsListAdapter();
-        adapter.setInflater(inflater);
-        commentsList = (ListView) containerView.findViewById(R.id.article_detailes_comments);
-        commentsList.setAdapter(adapter);
 
         ImageButton addCommentButton = (ImageButton) containerView.findViewById(R.id.article_detailes_add_button);
 
@@ -66,12 +88,46 @@ public class ArticleDetailsFragment extends Fragment {
         final TextView content = (TextView) containerView.findViewById(R.id.article_detailes_content_article);
         final TextView newComment = (TextView) containerView.findViewById(R.id.article_detailes_new_comment);
 
-        image.setImageResource(R.drawable.car);//TODO : change for every image
-        mainTitle.setText(articleData.mainTitle);
-        subTitle.setText(articleData.subTitle);
-        author.setText(articleData.author);
-        publishedDate.setText(articleData.publish_date);
-        content.setText(articleData.content);
+        Model.instance.getArticle(articleId, new Model.GetArticleCallback() {
+            @Override
+            public void onComplete(Article article) {
+                articleData = article;
+                image.setImageResource(R.drawable.car);//TODO : change for every image
+                mainTitle.setText(articleData.mainTitle);
+                subTitle.setText(articleData.subTitle);
+                author.setText(articleData.author);
+
+                SimpleDateFormat sfd = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+                Log.d("TAG","article date = " + sfd.format(new Date((long)article.publishDate + 3600000 * 7)));
+
+                publishedDate.setText(sfd.format(new Date((long)article.publishDate + 3600000 * 7)));
+                content.setText(articleData.content);
+                articleData.comments = new LinkedList<Comment>();
+                Model.instance.getArticleComments(articleId, new Model.GetArticleCommentsCallback() {
+                    @Override
+                    public void onComplete(List<Comment> list) {
+                        articleData.comments = list;
+                        adapter.notifyDataSetChanged();
+                        setListViewHeightBasedOnChildren(commentsList);
+                    }
+
+                    @Override
+                    public void onCancel() {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+        });
+
+        adapter = new CommentsListAdapter();
+        adapter.setInflater(inflater);
+        commentsList = (ListView) containerView.findViewById(R.id.article_detailes_comments);
+        commentsList.setAdapter(adapter);
 
         setListViewHeightBasedOnChildren(commentsList);
 
@@ -87,14 +143,17 @@ public class ArticleDetailsFragment extends Fragment {
                     newComment.setError("You need write text");
                 else{
                     Comment comment = new Comment();
-                    comment.date = "20/05/2008";//TODO:current date from firebase
                     comment.commentContent = newComment.getText().toString();
                     comment.author = "bobo on fire";//TODO:current author from loged in user
+                    comment.articleID = articleId;//TODo:change random
+
+                    comment.commentID = ""+articleData.comments.size() + "-" + articleId;
                     newComment.setText("");
 
-                    Model.instance.addNewCommentToArticle(mParam1,comment);
+                    Model.instance.addNewCommentToArticle(articleId,comment);
 
-                    notifyAdapter();
+                    //articleData = Model.instance.getArticle(articleID);
+                    //notifyAdapter();
                     setListViewHeightBasedOnChildren(commentsList);
                 }
             }
@@ -133,8 +192,10 @@ public class ArticleDetailsFragment extends Fragment {
 
         @Override
         public int getCount() {
-            if(articleData.comments == null)
+            if(articleData.comments == null) {
+                Log.d("TAG","comment 0");
                 return 0;
+            }
             else
                 return articleData.comments.size();
         }
@@ -159,10 +220,16 @@ public class ArticleDetailsFragment extends Fragment {
             TextView commentDate = (TextView) convertView.findViewById(R.id.comment_date);
             TextView commentContent = (TextView) convertView.findViewById(R.id.comment_content);
 
-            Comment comment = Model.instance.getAllCommentForArticle(articleData.id,position);
+            Comment comment = articleData.comments.get(position);
             commentAuthor.setText(comment.author);
-            commentDate.setText(comment.date);
             commentContent.setText(comment.commentContent);
+
+            SimpleDateFormat sfd = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+            Log.d("TAG","article date = " + sfd.format(new Date((long)comment.lastUpdatedDate + 3600000 * 7)));
+
+            commentDate.setText(sfd.format(new Date((long)comment.lastUpdatedDate + 3600000 * 7)));
+
+            Log.d("TAG","comment row");
             return convertView;
         }
     }
@@ -171,4 +238,9 @@ public class ArticleDetailsFragment extends Fragment {
         adapter.notifyDataSetChanged();
     }
 
+    @Override
+    public void onDestroy() {
+        EventBus.getDefault().unregister(this);
+        super.onDestroy();
+    }
 }

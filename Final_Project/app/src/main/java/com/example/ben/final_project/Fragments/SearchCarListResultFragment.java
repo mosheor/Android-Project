@@ -28,7 +28,7 @@ public class SearchCarListResultFragment extends Fragment {
 
     private static final String ARG_PARAM1 = "param1";//category
     private String category;
-    private static final String ARG_PARAM2 = "param2";//company id
+    private static final String ARG_PARAM2 = "param2";//company articleID
     private String companyId;
     private static final String ARG_PARAM3 = "param3";//engine volume condition
     private String engineVolumeCondition;

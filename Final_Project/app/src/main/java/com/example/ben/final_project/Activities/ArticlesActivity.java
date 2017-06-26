@@ -14,6 +14,7 @@ import com.example.ben.final_project.Fragments.ArticleAddFragment;
 import com.example.ben.final_project.Fragments.ArticleDetailsFragment;
 import com.example.ben.final_project.Fragments.ArticlesListFragment;
 import com.example.ben.final_project.Fragments.ArticleEditFragment;
+import com.example.ben.final_project.Model.Article;
 import com.example.ben.final_project.Model.Model;
 import com.example.ben.final_project.R;
 
@@ -90,7 +91,7 @@ public class ArticlesActivity extends Activity implements FragmentsDelegate {
                 finish();
                 break;
             case R.id.menu_edit_icon:
-                Log.d("TAG","ArticlesActivity edit id " + clickedArticleID);
+                Log.d("TAG","ArticlesActivity edit articleID " + clickedArticleID);
                 ArticleEditFragment editArticleFragment = ArticleEditFragment.newInstance(String.valueOf(clickedArticleID));
                 currentFragment = ARTICLE_EDIT;
                 openFragment(editArticleFragment);
@@ -98,15 +99,15 @@ public class ArticlesActivity extends Activity implements FragmentsDelegate {
                 item.setVisible(false);
                 break;
             case R.id.menu_add_icon:
-                int articlesListSize = Model.instance.getArticleListSize();
-                ArticleAddFragment addArticleFragment = ArticleAddFragment.newInstance(String.valueOf(articlesListSize));
+                //int articlesListSize = Model.instance.getArticleListSize();
+                ArticleAddFragment addArticleFragment = ArticleAddFragment.newInstance(String.valueOf(0/*articlesListSize*/));
                 currentFragment = ARTICLE_ADD;
                 openFragment(addArticleFragment);
                 item.setVisible(false);
                 commitIntent = false;
                 break;
             default:
-                throw new RuntimeException("Error id in btn click in the menu of ArticlesActivity");
+                throw new RuntimeException("Error articleID in btn click in the menu of ArticlesActivity");
         }
 
         if (commitIntent)
@@ -143,15 +144,29 @@ public class ArticlesActivity extends Activity implements FragmentsDelegate {
     }
 
     @Override
-    public void onAction(int command,String articleId) {
+    public void onAction(int command, final String articleId) {
         switch (command){
             case ARTICLE_DETAILS:
-                clickedArticleID = Model.instance.getArticle(articleId).id;
-                ArticleDetailsFragment articleDetailesFragment = ArticleDetailsFragment.newInstance(clickedArticleID);
-                editItem.setVisible(true);
-                addItem.setVisible(false);
-                currentFragment = ARTICLE_DETAILS;
-                openFragment(articleDetailesFragment);
+                Model.instance.getArticle(articleId, new Model.GetArticleCallback() {
+                    @Override
+                    public void onComplete(Article article) {
+                        if(article != null) {
+                            clickedArticleID = article.articleID;
+                            ArticleDetailsFragment articleDetailesFragment = ArticleDetailsFragment.newInstance(clickedArticleID);
+                            editItem.setVisible(true);
+                            addItem.setVisible(false);
+                            currentFragment = ARTICLE_DETAILS;
+                            openFragment(articleDetailesFragment);
+                        }
+                        else
+                            Log.d("TAG","article not in database");
+                    }
+
+                    @Override
+                    public void onCancel() {
+
+                    }
+                });
                 break;
             case ARTICLE_ADD:
                 articlesListFragment = new ArticlesListFragment();

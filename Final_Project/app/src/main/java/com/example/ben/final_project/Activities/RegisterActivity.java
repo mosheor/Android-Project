@@ -32,13 +32,13 @@ public class RegisterActivity extends Activity {
         menu.findItem(R.id.menu_edit_icon).setVisible(false);;
 
         //// TODO: not in use yet
-        /*final EditText firstNameET = (EditText) findViewById(R.id.register_first_name);
-        final EditText lastNameET = (EditText) findViewById(R.id.register_last_name);
-        final EditText birthDateET = (EditText) findViewById(R.id.register_birth_date);
-        final EditText usernameET = (EditText) findViewById(R.id.register_username);
-        final EditText emailET = (EditText) findViewById(R.id.register_email);
-        final EditText passwordET = (EditText) findViewById(R.id.register_password);
-        final EditText passwordValidationET = (EditText) findViewById(R.id.register_password_validation);*/
+        /*final EditText firstNameET = (EditText) findViewById(R.articleID.register_first_name);
+        final EditText lastNameET = (EditText) findViewById(R.articleID.register_last_name);
+        final EditText birthDateET = (EditText) findViewById(R.articleID.register_birth_date);
+        final EditText usernameET = (EditText) findViewById(R.articleID.register_username);
+        final EditText emailET = (EditText) findViewById(R.articleID.register_email);
+        final EditText passwordET = (EditText) findViewById(R.articleID.register_password);
+        final EditText passwordValidationET = (EditText) findViewById(R.articleID.register_password_validation);*/
         final Button registerBTN = (Button)findViewById(R.id.register_save_button);
 
         registerBTN.setOnClickListener(new View.OnClickListener() {
@@ -81,7 +81,7 @@ public class RegisterActivity extends Activity {
                 finish();
                 break;
             default:
-                throw new RuntimeException("Error id in btn click in the menu of RegisterActivity");
+                throw new RuntimeException("Error articleID in btn click in the menu of RegisterActivity");
         }
 
         if (commitIntent)

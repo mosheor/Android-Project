@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,12 +14,18 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.ben.final_project.Activities.FragmentsDelegate;
 import com.example.ben.final_project.Model.Article;
 import com.example.ben.final_project.Model.Model;
 import com.example.ben.final_project.R;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import java.util.LinkedList;
 import java.util.List;
 
 import static com.example.ben.final_project.Activities.ArticlesActivity.ARTICLE_DETAILS;
@@ -27,9 +34,38 @@ import static com.example.ben.final_project.Activities.ArticlesActivity.ARTICLE_
 public class ArticlesListFragment extends Fragment{
 
     ListView list;
-    List<Article> articlesData = Model.instance.getAllArticles();
+    List<Article> articlesData = new LinkedList<Article>();
     ArticleListAdapter adapter;
     FragmentsDelegate listener;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EventBus.getDefault().register(this);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMessageEvent(Model.UpdateArticleEvent event) {
+        Toast.makeText(getActivity(), "got new article event", Toast.LENGTH_SHORT).show();
+        Log.d("TAG","new article");
+        boolean exist = false;
+        for (Article article : articlesData) {
+            if (article.articleID.equals(event.article.articleID)) {
+                if(event.article.wasDeleted == false)
+                    article = event.article;
+                else
+                    articlesData.remove(articlesData.indexOf(article));
+                //sarticle = event.article;
+                exist = true;
+                break;
+            }
+        }
+        if (!exist && event.article.wasDeleted == false) {
+            articlesData.add(event.article);
+        }
+        adapter.notifyDataSetChanged();
+        list.setSelection(0);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -44,12 +80,25 @@ public class ArticlesListFragment extends Fragment{
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (listener != null)
-                    listener.onAction(ARTICLE_DETAILS,articlesData.get(Model.instance.getArticleListSize() - position - 1).id);
+                    listener.onAction(ARTICLE_DETAILS,articlesData.get(articlesData.size() - position - 1).articleID);
                 else
                     Log.d("TAG", "listener is null");
             }
         });
 
+        Model.instance.getAllArticles(new Model.GetAllArticlesAndObserveCallback() {
+            @Override
+            public void onComplete(List<Article> list) {
+                Log.d("TAG","all articles list");
+                articlesData = list;
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+        });
         return containerView;
     }
 
@@ -83,6 +132,12 @@ public class ArticlesListFragment extends Fragment{
         listener = null;
     }
 
+    @Override
+    public void onDestroy() {
+        EventBus.getDefault().unregister(this);
+        super.onDestroy();
+    }
+
     public void setDelegate(FragmentsDelegate d){
         this.listener = d;
     }
@@ -96,6 +151,8 @@ public class ArticlesListFragment extends Fragment{
 
         @Override
         public int getCount() {
+            //if(articlesData == null)
+            //    return 0;
             return articlesData.size();
         }
 

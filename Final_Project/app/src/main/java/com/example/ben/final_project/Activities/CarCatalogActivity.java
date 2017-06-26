@@ -119,14 +119,14 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
             case R.id.menu_edit_icon:
                 Log.d("TAG","CarCatalogActivity menu_edit_icon");
                 if(companyClickedID != null && carClickedID == null) {//edit company
-                    Log.d("TAG","CarCatalogActivity edit id " + companyClickedID);
+                    Log.d("TAG","CarCatalogActivity edit articleID " + companyClickedID);
                     CompanyEditFragment editCompanyFragment = CompanyEditFragment.newInstance(String.valueOf(companyClickedID));//todo in line
                     openFragment(editCompanyFragment);
                     item.setVisible(false);
                     currentFragment = CATALOG_COMPANY_ADD;
                 }
                 else if(companyClickedID != null && carClickedID != null){//edit car
-                    Log.d("TAG","CarCatalogActivity edit id " + carClickedID + " in company id " + companyClickedID);
+                    Log.d("TAG","CarCatalogActivity edit articleID " + carClickedID + " in company articleID " + companyClickedID);
                     CarEditFragment editCarFragment = CarEditFragment.newInstance(String.valueOf(companyClickedID),String.valueOf(carClickedID));
                     openFragment(editCarFragment);
                     item.setVisible(false);
@@ -135,7 +135,7 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
                 commitIntent = false;
                 break;
             default:
-                throw new RuntimeException("Error id in btn click in the menu of CarCatalogActivity");
+                throw new RuntimeException("Error articleID in btn click in the menu of CarCatalogActivity");
         }
 
         if (commitIntent)

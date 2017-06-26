@@ -13,12 +13,12 @@ public class ArticleModel {
     public ArticleModel(){
         for (int i = 0; i<10;i++){
             Article article = new Article();
-            article.id = ""+i;
+            article.articleID = ""+i;
             article.mainTitle = "Title number " + i;
             article.imageUrl = "image url";
             article.subTitle = "Sub Title number " + i;
             article.author = "Author number " + i;
-            article.publish_date = "15/05/1999";
+            article.publishDate = 0;
             article.content = "content number1\n" +
                     "content number2\n" +
                     "content number3\n" +
@@ -28,7 +28,6 @@ public class ArticleModel {
                 Comment comment = new Comment();
                 comment.author = "Author name number " + j;
                 comment.commentContent = "Comment content number " + j;
-                comment.date = "15/06/2000";
                 article.comments.add(comment);
             }
             articlesData.add(i,article);
@@ -42,7 +41,7 @@ public class ArticleModel {
     public void addNewCommentToArticle(String articleId,Comment comment){
         Log.d("TAG","getAllCommentForArticle article number " + articleId);
         for(Article article : articlesData){
-            if (article.id.equals(articleId)) {
+            if (article.articleID.equals(articleId)) {
                 Log.d("TAG","boom");
                 article.comments.add(comment);
             }
@@ -56,7 +55,7 @@ public class ArticleModel {
     public Comment getAllCommentForArticle(String articleId,int commentId){
         Log.d("TAG","getAllCommentForArticle article number " + articleId);
         for(Article article : articlesData){
-            if (article.id.equals(articleId)) {
+            if (article.articleID.equals(articleId)) {
                 Log.d("TAG","boom");
                 return article.comments.get(commentId);
             }
@@ -68,7 +67,7 @@ public class ArticleModel {
         for (int i = 0; i < articlesData.size(); i++)
         {
             Article article = articlesData.get(i);
-            if (article.id.equals(id))
+            if (article.articleID.equals(id))
             {
                 articlesData.remove(i);
                 return true;
@@ -80,7 +79,7 @@ public class ArticleModel {
     public Article getArticle(String id) {
         Log.d("TAG","getArticle number " + id);
         for(Article article : articlesData){
-            if (article.id.equals(id)) {
+            if (article.articleID.equals(id)) {
                 Log.d("TAG","boom");
                 return article;
             }
@@ -89,14 +88,14 @@ public class ArticleModel {
     }
 
     public boolean editArticle(Article editedArticle) {
-        Log.d("TAG","editArtile number " + editedArticle.id);
+        Log.d("TAG","editArtile number " + editedArticle.articleID);
         for(Article article : articlesData){
-            if (article.id.equals(editedArticle.id)) {
+            if (article.articleID.equals(editedArticle.articleID)) {
                 article.content = editedArticle.content;
                 article.mainTitle = editedArticle.mainTitle;
                 article.subTitle = editedArticle.subTitle;
                 article.author = editedArticle.author;
-                article.publish_date = editedArticle.publish_date;
+                article.publishDate = editedArticle.publishDate;
                 article.imageUrl = editedArticle.imageUrl;
                 return true;
             }
