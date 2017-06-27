@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.example.ben.final_project.Activities.FragmentsDelegate;
 import com.example.ben.final_project.Activities.GetPicture;
@@ -24,6 +25,7 @@ import com.example.ben.final_project.R;
 import static android.view.View.GONE;
 import static com.example.ben.final_project.Activities.ArticlesActivity.ARTICLE_EDIT;
 import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALOG_ADD_PICTURE;
+import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALOG_CAR_EDIT;
 import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALOG_COMPANY_EDIT;
 
 public class CompanyEditFragment extends Fragment implements GetPicture {
@@ -100,58 +102,62 @@ public class CompanyEditFragment extends Fragment implements GetPicture {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("TAG","CompanyEditFragment Btn Save click");
+                if(Model.instance.isNetworkAvailable()) {
+                    Log.d("TAG", "CompanyEditFragment Btn Save click");
 
-                int ok = 0;
-                boolean save = true;
+                    int ok = 0;
+                    boolean save = true;
 
-                ok += valid(companyName,"Main title is required!");//TODO:write errors in hebrew
-                ok += valid(description,"Content is required!");
+                    ok += valid(companyName, "Main title is required!");//TODO:write errors in hebrew
+                    ok += valid(description, "Content is required!");
 
-                if(ok != 2)
-                    save = false;
-                else{
-                    if(companyName.getText().toString().compareTo(company.name) == 0)
-                        if(imageBitmap != null)
-                            if(description.getText().toString().compareTo(company.companyDescription) == 0)
-                                        save = false;
+                    if (ok != 2)
+                        save = false;
+                    else {
+                        if (companyName.getText().toString().compareTo(company.name) == 0)
+                            if (imageBitmap != null)
+                                if (description.getText().toString().compareTo(company.companyDescription) == 0)
+                                    save = false;
 
-                }
-
-                if(save == true) {
-                    company.name = companyName.getText().toString();
-                    company.companyDescription = description.getText().toString();
-
-
-                    if (imageBitmap != null) {
-                        Model.instance.saveImage(imageBitmap, Model.random() + ".jpeg", new Model.SaveImageListener() {
-                            @Override
-                            public void complete(String url) {
-                                company.companyLogo = url;
-                                Model.instance.editCompany(company);
-                                listener.onAction(CATALOG_COMPANY_EDIT,null);
-                                progressBar.setVisibility(GONE);
-                                listener.onAction(ARTICLE_EDIT, null);
-                            }
-
-                            @Override
-                            public void fail() {
-                                //notify operation fail,...
-                                Model.instance.editCompany(company);
-                                listener.onAction(CATALOG_COMPANY_EDIT,null);
-                            }
-                        });
-                    }else {
-                        company.companyLogo = "";
-                        Model.instance.editCompany(company);
-                        progressBar.setVisibility(GONE);
-                        listener.onAction(ARTICLE_EDIT, null);
                     }
 
+                    if (save == true) {
+                        company.name = companyName.getText().toString();
+                        company.companyDescription = description.getText().toString();
+
+
+                        if (imageBitmap != null) {
+                            Model.instance.saveImage(imageBitmap, Model.random() + ".jpeg", new Model.SaveImageListener() {
+                                @Override
+                                public void complete(String url) {
+                                    company.companyLogo = url;
+                                    Model.instance.editCompany(company);
+                                    progressBar.setVisibility(GONE);
+                                    listener.onAction(CATALOG_COMPANY_EDIT, null);
+                                }
+
+                                @Override
+                                public void fail() {
+                                    //notify operation fail,...
+                                    Model.instance.editCompany(company);
+                                    listener.onAction(CATALOG_COMPANY_EDIT, null);
+                                }
+                            });
+                        } else {
+                            company.companyLogo = "";
+                            Model.instance.editCompany(company);
+                            progressBar.setVisibility(GONE);
+                            listener.onAction(CATALOG_COMPANY_EDIT, null);
+                        }
+
+                    } else {
+                        Log.d("TAG", "CompanyEditFragment did not save edited article");
+                        //listener.returnEditCompanyResult(RESULT_FAIL);
+                    }
                 }
-                else{
-                    Log.d("TAG","CompanyEditFragment did not save edited article");
-                    //listener.returnEditCompanyResult(RESULT_FAIL);
+                else {
+                    Toast.makeText(getActivity(), "There is no connection", Toast.LENGTH_SHORT);
+                    listener.onAction(CATALOG_COMPANY_EDIT,null);
                 }
 
             }
@@ -168,7 +174,10 @@ public class CompanyEditFragment extends Fragment implements GetPicture {
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Model.instance.removeCompany(company);
+                if (Model.instance.isNetworkAvailable())
+                    Model.instance.removeCompany(company);
+                else
+                    Toast.makeText(getActivity(), "There is no connection", Toast.LENGTH_SHORT);
                 listener.onAction(CATALOG_COMPANY_EDIT,null);
             }
         });

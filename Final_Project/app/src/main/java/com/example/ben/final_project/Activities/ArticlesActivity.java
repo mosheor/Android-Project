@@ -185,10 +185,12 @@ public class ArticlesActivity extends Activity implements FragmentsDelegate {
                 break;
             case ARTICLE_ADD:
                 addItem.setVisible(true);
+                editItem.setVisible(false);
                 openCompanyListFragment();
                 break;
             case ARTICLE_EDIT:
                 addItem.setVisible(true);
+                editItem.setVisible(false);
                 openCompanyListFragment();
                 break;
             case ADD_PICTURE:

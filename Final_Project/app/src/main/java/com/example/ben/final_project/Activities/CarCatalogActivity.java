@@ -114,6 +114,7 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
                         currentFragment = CATALOG_COMPANY_ADD;
                     } else {
                         CarAddFragment addCarFragment = CarAddFragment.newInstance(companyClickedID, "0");
+                        imageDelegate = addCarFragment;
                         openFragment(addCarFragment);
                         item.setVisible(false);
                         currentFragment = CATALOG_CAR_ADD;
@@ -136,6 +137,7 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
                     } else if (companyClickedID != null && carClickedID != null) {//edit car
                         Log.d("TAG", "CarCatalogActivity edit articleID " + carClickedID + " in company articleID " + companyClickedID);
                         CarEditFragment editCarFragment = CarEditFragment.newInstance(String.valueOf(companyClickedID), String.valueOf(carClickedID));
+                        imageDelegate = editCarFragment;
                         openFragment(editCarFragment);
                         item.setVisible(false);
                         currentFragment = CATALOG_CAR_EDIT;

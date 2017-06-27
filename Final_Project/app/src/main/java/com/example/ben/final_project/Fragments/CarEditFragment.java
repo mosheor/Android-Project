@@ -4,6 +4,7 @@ package com.example.ben.final_project.Fragments;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,22 +13,34 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.example.ben.final_project.Activities.FragmentsDelegate;
+import com.example.ben.final_project.Activities.GetPicture;
 import com.example.ben.final_project.Model.Car;
 import com.example.ben.final_project.Model.Model;
 import com.example.ben.final_project.R;
 
+import static android.view.View.GONE;
+import static com.example.ben.final_project.Activities.ArticlesActivity.ADD_PICTURE;
+import static com.example.ben.final_project.Activities.ArticlesActivity.ARTICLE_ADD;
+import static com.example.ben.final_project.Activities.ArticlesActivity.ARTICLE_EDIT;
+import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALOG_ADD_PICTURE;
 import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALOG_CAR_EDIT;
 
-public class CarEditFragment extends Fragment {
+public class CarEditFragment extends Fragment implements GetPicture {
     private static final String ARG_PARAM1 = "param1";//company articleID
     private String companyId;
     private static final String ARG_PARAM2 = "param2";//car articleID
     private String carId;
     Car car;
     private FragmentsDelegate listener;
+    ImageView imageUrl;
+    ProgressBar progressBar;
+    Bitmap imageBitmap;
 
     public static CarEditFragment newInstance(String param1, String param2) {
         CarEditFragment fragment = new CarEditFragment();
@@ -69,7 +82,6 @@ public class CarEditFragment extends Fragment {
         final EditText carDescription = (EditText) containerView.findViewById(R.id.edit_car_description);
         final EditText fuelConsumption = (EditText) containerView.findViewById(R.id.edit_car_fuel_consumption);
         final EditText hp = (EditText) containerView.findViewById(R.id.edit_car_hp);
-        final EditText picture = (EditText) containerView.findViewById(R.id.edit_car_image);
         final EditText carName = (EditText) containerView.findViewById(R.id.edit_car_name);
         final EditText pollusion = (EditText) containerView.findViewById(R.id.edit_car_pollusion);
         final EditText price = (EditText) containerView.findViewById(R.id.edit_car_price);
@@ -77,6 +89,9 @@ public class CarEditFragment extends Fragment {
         final EditText zeroToHundrend = (EditText) containerView.findViewById(R.id.edit_car_zero_to_hundrend);
         final EditText engineVolume = (EditText) containerView.findViewById(R.id.edit_car_engine_volume);
         final Spinner category = (Spinner) containerView.findViewById(R.id.edit_car_category);
+        imageUrl = (ImageView) containerView.findViewById(R.id.edit_car_image);
+        progressBar = (ProgressBar) containerView.findViewById(R.id.edit_car_progressBar);
+        progressBar.setVisibility(GONE);
 
         final ArrayAdapter<CharSequence> categoryAdapter = ArrayAdapter.createFromResource(this.getActivity(), R.array.car_category_array, android.R.layout.simple_spinner_item);
         categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -93,12 +108,25 @@ public class CarEditFragment extends Fragment {
                 carDescription.setText(car.description);
                 fuelConsumption.setText(String.valueOf(car.fuelConsumption));
                 hp.setText(String.valueOf(car.hp));
-                picture.setText(String.valueOf(car.carPicture));
                 pollusion.setText(String.valueOf(car.pollution));
                 price.setText(String.valueOf(car.price));
                 warranty.setText(String.valueOf(car.warranty));
                 zeroToHundrend.setText(String.valueOf(car.zeroToHundred));
                 engineVolume.setText(String.valueOf(car.engineVolume));
+
+                progressBar.setVisibility(View.VISIBLE);
+                Model.instance.getImage(car.carPicture, new Model.GetImageListener() {
+                    @Override
+                    public void onSuccess(Bitmap image) {
+                        imageUrl.setImageBitmap(image);
+                        progressBar.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onFail() {
+
+                    }
+                });
 
                 for(int i=0;i<categoryAdapter.getCount();i++){
                     if(car.carCategory.compareTo(categoryAdapter.getItem(i).toString()) == 0)
@@ -117,73 +145,105 @@ public class CarEditFragment extends Fragment {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("TAG","CompanyEditFragment Btn Save click");
+                if (Model.instance.isNetworkAvailable()) {
+                    Log.d("TAG", "CompanyEditFragment Btn Save click");
 
-                int ok = 0;
-                boolean save = true;
+                    int ok = 0;
+                    boolean save = true;
 
-                ok += valid(carDescription,"Description is required!");//TODO:write errors in hebrew
-                ok += valid(picture,"Car picture logo is required!");
-                ok += valid(carName,"Car name is required!");
-                ok += valid(fuelConsumption,"Fuel consumption is required!");
-                ok += valid(hp,"Horse powers is required!");
-                ok += valid(pollusion,"Pollusion is required!");
-                ok += valid(price,"Car price is required!");
-                ok += valid(warranty,"Car warranty is required!");
-                ok += valid(zeroToHundrend,"0-100 is required!");
-                ok += valid(engineVolume,"Engine volume is required!");
-                ok += checkIfInteger(fuelConsumption);
-                ok += checkIfInteger(hp);
-                ok += checkIfInteger(pollusion);
-                ok += checkIfInteger(price);
-                ok += checkIfInteger(warranty);
-                ok += checkIfFloat(zeroToHundrend);
-                ok += checkIfInteger(engineVolume);
+                    ok += valid(carDescription, "Description is required!");//TODO:write errors in hebrew
+                    ok += valid(carName, "Car name is required!");
+                    ok += valid(fuelConsumption, "Fuel consumption is required!");
+                    ok += valid(hp, "Horse powers is required!");
+                    ok += valid(pollusion, "Pollusion is required!");
+                    ok += valid(price, "Car price is required!");
+                    ok += valid(warranty, "Car warranty is required!");
+                    ok += valid(zeroToHundrend, "0-100 is required!");
+                    ok += valid(engineVolume, "Engine volume is required!");
+                    ok += checkIfInteger(fuelConsumption);
+                    ok += checkIfInteger(hp);
+                    ok += checkIfInteger(pollusion);
+                    ok += checkIfInteger(price);
+                    ok += checkIfInteger(warranty);
+                    ok += checkIfFloat(zeroToHundrend);
+                    ok += checkIfInteger(engineVolume);
 
-                if(ok != 17)
-                    save = false;
-                else{
-                    if(carDescription.getText().toString().compareTo(car.description) == 0)
-                        if(picture.getText().toString().compareTo(car.carPicture) == 0)
-                            if(carName.getText().toString().compareTo(car.carName) == 0)
-                                if(fuelConsumption.getText().toString().compareTo(String.valueOf(car.fuelConsumption)) == 0)
-                                    if(hp.getText().toString().compareTo(String.valueOf(car.hp)) == 0)
-                                        if(pollusion.getText().toString().compareTo(String.valueOf(car.pollution)) == 0)
-                                            if(price.getText().toString().compareTo(String.valueOf(car.price)) == 0)
-                                                if(warranty.getText().toString().compareTo(String.valueOf(car.warranty)) == 0)
-                                                    if(zeroToHundrend.getText().toString().compareTo(String.valueOf(car.zeroToHundred)) == 0)
-                                                        if(engineVolume.getText().toString().compareTo(String.valueOf(car.engineVolume)) == 0)
-                                                            if(category.getSelectedItem().toString().compareTo(String.valueOf(car.carCategory)) == 0)
-                                                                save = false;
+                    if (ok != 16)
+                        save = false;
+                    else {
+                        if (carDescription.getText().toString().compareTo(car.description) == 0)
+                            if (carName.getText().toString().compareTo(car.carName) == 0)
+                                if (fuelConsumption.getText().toString().compareTo(String.valueOf(car.fuelConsumption)) == 0)
+                                    if (hp.getText().toString().compareTo(String.valueOf(car.hp)) == 0)
+                                        if (pollusion.getText().toString().compareTo(String.valueOf(car.pollution)) == 0)
+                                            if (price.getText().toString().compareTo(String.valueOf(car.price)) == 0)
+                                                if (warranty.getText().toString().compareTo(String.valueOf(car.warranty)) == 0)
+                                                    if (zeroToHundrend.getText().toString().compareTo(String.valueOf(car.zeroToHundred)) == 0)
+                                                        if (engineVolume.getText().toString().compareTo(String.valueOf(car.engineVolume)) == 0)
+                                                            if (category.getSelectedItem().toString().compareTo(String.valueOf(car.carCategory)) == 0)
+                                                                if (imageBitmap != null)
+                                                                    save = false;
 
+                    }
+
+                    if (save == true) {
+                        final Car car = new Car();
+                        car.carID = carID;
+                        car.carName = carName.getText().toString();
+                        car.hp = Integer.parseInt(hp.getText().toString());
+                        car.pollution = Integer.parseInt(pollusion.getText().toString());
+                        car.fuelConsumption = Integer.parseInt(fuelConsumption.getText().toString());
+                        car.zeroToHundred = Integer.parseInt(zeroToHundrend.getText().toString());
+                        car.companyName = companyName.getText().toString();
+                        car.companyID = companyID;
+                        car.description = carDescription.getText().toString();
+                        car.engineVolume = Integer.parseInt(engineVolume.getText().toString());
+                        car.warranty = Integer.parseInt(warranty.getText().toString());
+                        car.price = Integer.parseInt(price.getText().toString());
+                        car.carCategory = category.getSelectedItem().toString();
+
+                        if (imageBitmap != null) {
+                            Model.instance.saveImage(imageBitmap, Model.random() + ".jpeg", new Model.SaveImageListener() {
+                                @Override
+                                public void complete(String url) {
+                                    car.carPicture = url;
+                                    Model.instance.editCar(car);
+                                    progressBar.setVisibility(GONE);
+                                    listener.onAction(CATALOG_CAR_EDIT, null);
+                                }
+
+                                @Override
+                                public void fail() {
+                                    //notify operation fail,...
+                                    progressBar.setVisibility(GONE);
+                                    listener.onAction(CATALOG_CAR_EDIT, null);
+                                }
+                            });
+                        } else {
+                            car.carPicture = "";
+                            Model.instance.editCar(car);
+                            progressBar.setVisibility(GONE);
+                            listener.onAction(CATALOG_CAR_EDIT, null);
+                        }
+                    } else {
+                        Log.d("TAG", "CompanyEditFragment did not save edited article");
+                    }
                 }
-
-                if(save == true) {
-                    Car car = new Car();
-                    car.carID = carID;
-                    car.carName = carName.getText().toString();
-                    car.hp = Integer.parseInt(hp.getText().toString());
-                    car.pollution = Integer.parseInt(pollusion.getText().toString());
-                    car.fuelConsumption = Integer.parseInt(fuelConsumption.getText().toString());
-                    car.zeroToHundred = Integer.parseInt(zeroToHundrend.getText().toString());
-                    car.carPicture = picture.getText().toString();
-                    car.companyName = companyName.getText().toString();
-                    car.companyID = companyID;
-                    car.description = carDescription.getText().toString();
-                    car.engineVolume = Integer.parseInt(engineVolume.getText().toString());
-                    car.warranty = Integer.parseInt(warranty.getText().toString());
-                    car.price = Integer.parseInt(price.getText().toString());
-                    car.carCategory = category.getSelectedItem().toString();
-
-                    //TODO:spinner
-                    Model.instance.editCar(car);
+                else {
+                    Toast.makeText(getActivity(), "There is no connection", Toast.LENGTH_SHORT);
                     listener.onAction(CATALOG_CAR_EDIT,null);
                 }
-                else{
-                    Log.d("TAG","CompanyEditFragment did not save edited article");
-                    //listener.returnEditCompanyResult(RESULT_FAIL);
-                }
 
+            }
+        });
+
+        imageUrl.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //TODO:go to galary/camera
+                //dispatchTakePictureIntent();
+                progressBar.setVisibility(View.VISIBLE);
+                listener.onAction(CATALOG_ADD_PICTURE,null);
             }
         });
 
@@ -198,7 +258,11 @@ public class CarEditFragment extends Fragment {
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Model.instance.removeCar(car);
+                if(Model.instance.isNetworkAvailable()) {
+                    Model.instance.removeCar(car);
+                }
+                else
+                    Toast.makeText(getActivity(), "There is no connection", Toast.LENGTH_SHORT);
                 listener.onAction(CATALOG_CAR_EDIT,null);
             }
         });
@@ -273,5 +337,12 @@ public class CarEditFragment extends Fragment {
             et.setError("Please insert integer");
             return 0;
         }
+    }
+
+    @Override
+    public void getPicture(Bitmap bitmap) {
+        progressBar.setVisibility(GONE);
+        imageBitmap = bitmap;
+        imageUrl.setImageBitmap(bitmap);
     }
 }

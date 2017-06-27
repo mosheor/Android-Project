@@ -2,17 +2,21 @@ package com.example.ben.final_project.Fragments;
 
 
 import android.app.Fragment;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.ben.final_project.Model.Car;
 import com.example.ben.final_project.Model.Model;
 import com.example.ben.final_project.R;
+
+import static android.view.View.GONE;
 
 public class CarDetailsFragment extends Fragment {
 
@@ -55,12 +59,13 @@ public class CarDetailsFragment extends Fragment {
         final TextView zeroToHundrend = (TextView) containerView.findViewById(R.id.car_details_zero_to_hundrend);
         final TextView fuelConsumption = (TextView) containerView.findViewById(R.id.car_details_fuel_consumption);
         final TextView category = (TextView) containerView.findViewById(R.id.car_details_category);
+        final ProgressBar progressBar = (ProgressBar) containerView.findViewById(R.id.car_details_progressBar);
+        progressBar.setVisibility(GONE);
 
         Model.instance.getCar(companyID, carID, new Model.GetModelCallback() {
             @Override
             public void onComplete(Car car) {
                 carData = car;
-                carPic.setImageResource(R.drawable.car);//TODO:change to current car
                 description.setText(carData.description);
                 engineVolume.setText(carData.engineVolume + " ליטר");
                 hp.setText(carData.hp + " כוחות סוס");
@@ -70,6 +75,20 @@ public class CarDetailsFragment extends Fragment {
                 zeroToHundrend.setText(carData.zeroToHundred + " שניות");
                 fuelConsumption.setText(carData.fuelConsumption + " ליטר ל - 100 קילומטר");
                 category.setText(carData.carCategory);
+
+                progressBar.setVisibility(View.VISIBLE);
+                Model.instance.getImage(car.carPicture, new Model.GetImageListener() {
+                    @Override
+                    public void onSuccess(Bitmap imageLoad) {
+                        carPic.setImageBitmap(imageLoad);
+                        progressBar.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onFail() {
+
+                    }
+                });
             }
 
             @Override

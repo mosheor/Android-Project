@@ -26,7 +26,7 @@ public class ArticleSQL {
     static final String ARTICLE_WAS_DELETED = "wasDeleted";
 
     static List<Article> getAllArticles(SQLiteDatabase db) {
-        Cursor cursor = db.query(ARTICLE_TABLE, null,null,null/* ARTICLE_WAS_DELETED + " = ?", new String[]    {"0"}*/, null, null, null);
+        Cursor cursor = db.query(ARTICLE_TABLE, null, ARTICLE_WAS_DELETED + " = ?", new String[]    {"0"}, null, null, null);
         List<Article> list = new LinkedList<Article>();
         if (cursor.moveToFirst()) {
             int idIndex = cursor.getColumnIndex(ARTICLE_ID);

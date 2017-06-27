@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.example.ben.final_project.Activities.FragmentsDelegate;
 import com.example.ben.final_project.Activities.GetPicture;
@@ -80,50 +81,54 @@ public class CompanyAddFragment extends Fragment implements GetPicture {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("TAG","CompanyAddFragment Btn Save click");
+                if(Model.instance.isNetworkAvailable()) {
+                    Log.d("TAG", "CompanyAddFragment Btn Save click");
 
-                int ok = 0;
-                boolean save = true;
+                    int ok = 0;
+                    boolean save = true;
 
-                ok += valid(companyName,"Company name is required!");//TODO:write errors in hebrew
-                ok += valid(description,"Description is required!");
+                    ok += valid(companyName, "Company name is required!");//TODO:write errors in hebrew
+                    ok += valid(description, "Description is required!");
 
-                if(ok != 2)
-                    save = false;
+                    if (ok != 2)
+                        save = false;
 
-                if(save == true) {
-                    final Company company = new Company();
-                    company.companyId = Model.random();
-                    company.name = companyName.getText().toString();
-                    company.companyDescription = description.getText().toString();
-                    company.models = new LinkedList<Car>();
+                    if (save == true) {
+                        final Company company = new Company();
+                        company.companyId = Model.random();
+                        company.name = companyName.getText().toString();
+                        company.companyDescription = description.getText().toString();
+                        company.models = new LinkedList<Car>();
 
-                    if (imageBitmap != null) {
-                        Model.instance.saveImage(imageBitmap,  Model.random()  + ".jpeg", new Model.SaveImageListener() {
-                            @Override
-                            public void complete(String url) {
-                                company.companyLogo = url;
-                                Model.instance.addNewCompany(company);
-                                progressBar.setVisibility(GONE);
-                                listener.onAction(CATALOG_COMPANY_ADD,null);
-                            }
+                        if (imageBitmap != null) {
+                            Model.instance.saveImage(imageBitmap, Model.random() + ".jpeg", new Model.SaveImageListener() {
+                                @Override
+                                public void complete(String url) {
+                                    company.companyLogo = url;
+                                    Model.instance.addNewCompany(company);
+                                    progressBar.setVisibility(GONE);
+                                    listener.onAction(CATALOG_COMPANY_ADD, null);
+                                }
 
-                            @Override
-                            public void fail() {
-                                //notify operation fail,...
-                                progressBar.setVisibility(GONE);
-                                listener.onAction(CATALOG_COMPANY_ADD,null);
-                            }
-                        });
-                    }else{
-                        company.companyLogo = "";
-                        Model.instance.addNewCompany(company);
-                        progressBar.setVisibility(GONE);
-                        listener.onAction(ARTICLE_ADD, null);
+                                @Override
+                                public void fail() {
+                                    //notify operation fail,...
+                                    progressBar.setVisibility(GONE);
+                                    listener.onAction(CATALOG_COMPANY_ADD, null);
+                                }
+                            });
+                        } else {
+                            company.companyLogo = "";
+                            Model.instance.addNewCompany(company);
+                            progressBar.setVisibility(GONE);
+                            listener.onAction(CATALOG_COMPANY_ADD, null);
+                        }
+                    } else {
+                        Log.d("TAG", "CompanyAddFragment Cant save new company");
                     }
-                }
-                else{
-                    Log.d("TAG","CompanyAddFragment Cant save new company");
+                }else {
+                    Toast.makeText(getActivity(), "There is no connection", Toast.LENGTH_SHORT).show();
+                    listener.onAction(CATALOG_COMPANY_ADD,null);
                 }
 
             }
