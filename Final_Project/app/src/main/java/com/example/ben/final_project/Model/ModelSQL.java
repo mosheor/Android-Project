@@ -8,6 +8,9 @@ import android.database.sqlite.SQLiteOpenHelper;
  * Created by mazliachbe on 26/06/2017.
  */
 
+/**
+ * the super ModelSQL class which handles the SQLite db of the app
+ */
 public class ModelSQL extends SQLiteOpenHelper {
 
     ModelSQL(Context context) {
@@ -16,10 +19,11 @@ public class ModelSQL extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        ArticleSQL.onCreate(db);
-        CommentSQL.onCreate(db);
-        CompanySQL.onCreate(db);
-        CarSQL.onCreate(db);
+        //classes which handles specific tables
+        ArticleSQL.onCreate(db);//articles table
+        CommentSQL.onCreate(db);//comments table
+        CompanySQL.onCreate(db);//companies table
+        CarSQL.onCreate(db);//cars table
     }
 
     @Override

@@ -12,8 +12,12 @@ import java.util.List;
  * Created by mazliachbe on 27/06/2017.
  */
 
+/**
+ * CarSQL handler class for cars table
+ */
 public class CarSQL {
 
+    //the tables and columns we use as a reference
     static final String CAR_TABLE = "cars";
     static final String CAR_ID = "carID";
     static final String CAR_COMPANY_ID = "companyID";
@@ -32,7 +36,14 @@ public class CarSQL {
     static final String CAR_LAST_UPDATED = "lastUpdatedDate";
     static final String CAR_WAS_DELETED = "wasDeleted";
 
-    static List<Car> getCompanyModels(SQLiteDatabase db , String companyId) {
+    /**
+     * get all specific company's cars from cars table by specifying the companyId
+     * @param db the SQLiteDatabase readable db
+     * @param companyId id of the company
+     * @return if there are cars associated to the company,
+     *         returns all the company's cars, else - an empty list
+     */
+    static List<Car> getCompanyCars(SQLiteDatabase db , String companyId) {
         Log.d("TAG","get all company models");
         Cursor cursor = db.query(CAR_TABLE, null, null,null, null, null, null);
         List<Car> list = new LinkedList<Car>();
@@ -82,6 +93,13 @@ public class CarSQL {
         return list;
     }
 
+    /**
+     * get a car associated to a company from cars table by specifying companyId,carId
+     * @param db the SQLiteDatabase readable db
+     * @param companyId id of the company
+     * @param carId id of the car
+     * @return the car fassociated to the company if exists, else null
+     */
     static Car getCar(SQLiteDatabase db , String companyId, String carId) {
         Log.d("TAG","get specific model");
         Cursor cursor = db.query(CAR_TABLE, null, null,null, null, null, null);
@@ -132,6 +150,11 @@ public class CarSQL {
         return null;
     }
 
+    /**
+     * add a car to cars table
+     * @param db the SQLiteDatabase writable db
+     * @param car the car obj
+     */
     static void addCar(SQLiteDatabase db, Car car) {
         Log.d("TAG","addCar carSql");
         ContentValues values = new ContentValues();
@@ -158,6 +181,11 @@ public class CarSQL {
         db.insert(CAR_TABLE, CAR_ID, values);
     }
 
+    /**
+     * edit a car from cars table
+     * @param db the SQLiteDatabase writable db
+     * @param car the edited car obj to be saved
+     */
     public static void editCar(SQLiteDatabase db, Car car) {
         ContentValues values = new ContentValues();
         values.put(CAR_ID, car.carID);

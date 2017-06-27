@@ -26,8 +26,6 @@ import com.example.ben.final_project.R;
 import java.util.LinkedList;
 
 import static android.view.View.GONE;
-import static com.example.ben.final_project.Activities.ArticlesActivity.ADD_PICTURE;
-import static com.example.ben.final_project.Activities.ArticlesActivity.ARTICLE_ADD;
 import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALOG_ADD_PICTURE;
 import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALOG_COMPANY_ADD;
 
@@ -95,13 +93,13 @@ public class CompanyAddFragment extends Fragment implements GetPicture {
 
                     if (save == true) {
                         final Company company = new Company();
-                        company.companyId = Model.random();
+                        company.companyId = Model.generateRandomId();
                         company.name = companyName.getText().toString();
                         company.companyDescription = description.getText().toString();
                         company.models = new LinkedList<Car>();
 
                         if (imageBitmap != null) {
-                            Model.instance.saveImage(imageBitmap, Model.random() + ".jpeg", new Model.SaveImageListener() {
+                            Model.instance.saveImage(imageBitmap, Model.generateRandomId() + ".jpeg", new Model.SaveImageListener() {
                                 @Override
                                 public void complete(String url) {
                                     company.companyLogo = url;

@@ -20,8 +20,17 @@ import static com.google.firebase.storage.StorageException.ERROR_OBJECT_NOT_FOUN
  * Created by mazliachbe on 27/06/2017.
  */
 
+/**
+ * ModelFirebaseFiles class to handle Firebase storage pictures save and load
+ */
 public class ModelFirebaseFiles {
 
+    /**
+     * Save an image async in Firebase storage and get back its downloadUrl.
+     * @param imageBmp the Bitmap image to be saved.
+     * @param name the name of the generated save file.
+     * @param listener see {@link Model.SaveImageListener}
+     */
     public void saveImage(Bitmap imageBmp, String name, final Model.SaveImageListener listener){
         FirebaseStorage storage = FirebaseStorage.getInstance();
 
@@ -51,6 +60,11 @@ public class ModelFirebaseFiles {
     }
 
 
+    /**
+     * Get an image from Firebase storage async.
+     * @param url url (in Firebase) of the image
+     * @param listener see {@link Model.GetImageListener}
+     */
     public void getImage(String url, final Model.GetImageListener listener){
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference httpsReference = storage.getReferenceFromUrl(url);

@@ -71,6 +71,7 @@ public class ArticleDetailsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //subscribe the EventBus
         EventBus.getDefault().register(this);
         if (getArguments() != null) {
             articleId = getArguments().getString(ARG_PARAM1);
@@ -130,7 +131,7 @@ public class ArticleDetailsFragment extends Fragment {
                     }
                 });
 
-                Model.instance.getArticleComments(articleId, new Model.GetArticleCommentsCallback() {
+                Model.instance.getArticleComments(articleId, new Model.GetArticleCommentsAndObserveCallback() {
                     @Override
                     public void onComplete(List<Comment> list) {
                         articleData.comments = list;
@@ -166,12 +167,12 @@ public class ArticleDetailsFragment extends Fragment {
                         Comment comment = new Comment();
                         comment.commentContent = newComment.getText().toString();
                         comment.author = "bobo on fire";//TODO:current author from loged in user
-                        comment.articleID = articleId;//TODo:change random
+                        comment.articleID = articleId;//TODo:change generateRandomId
 
-                        comment.commentID = Model.random();
+                        comment.commentID = Model.generateRandomId();
                         newComment.setText("");
 
-                        Model.instance.addNewCommentToArticle(articleId, comment);
+                        Model.instance.addNewCommentToArticle(comment);
 
                         //articleData = Model.instance.getArticle(articleID);
                         //notifyAdapter();
@@ -264,6 +265,7 @@ public class ArticleDetailsFragment extends Fragment {
 
     @Override
     public void onDestroy() {
+        //unsubscribe to the EventBus
         EventBus.getDefault().unregister(this);
         super.onDestroy();
     }

@@ -23,9 +23,7 @@ import com.example.ben.final_project.Model.Model;
 import com.example.ben.final_project.R;
 
 import static android.view.View.GONE;
-import static com.example.ben.final_project.Activities.ArticlesActivity.ARTICLE_EDIT;
 import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALOG_ADD_PICTURE;
-import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALOG_CAR_EDIT;
 import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALOG_COMPANY_EDIT;
 
 public class CompanyEditFragment extends Fragment implements GetPicture {
@@ -127,7 +125,7 @@ public class CompanyEditFragment extends Fragment implements GetPicture {
 
 
                         if (imageBitmap != null) {
-                            Model.instance.saveImage(imageBitmap, Model.random() + ".jpeg", new Model.SaveImageListener() {
+                            Model.instance.saveImage(imageBitmap, Model.generateRandomId() + ".jpeg", new Model.SaveImageListener() {
                                 @Override
                                 public void complete(String url) {
                                     company.companyLogo = url;

@@ -25,9 +25,6 @@ import com.example.ben.final_project.Model.Model;
 import com.example.ben.final_project.R;
 
 import static android.view.View.GONE;
-import static com.example.ben.final_project.Activities.ArticlesActivity.ADD_PICTURE;
-import static com.example.ben.final_project.Activities.ArticlesActivity.ARTICLE_ADD;
-import static com.example.ben.final_project.Activities.ArticlesActivity.ARTICLE_EDIT;
 import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALOG_ADD_PICTURE;
 import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALOG_CAR_EDIT;
 
@@ -98,7 +95,7 @@ public class CarEditFragment extends Fragment implements GetPicture {
         category.setAdapter(categoryAdapter);
 
         //TODO:spinner
-        Model.instance.getCar(companyID, carID, new Model.GetModelCallback() {
+        Model.instance.getCar(companyID, carID, new Model.GetCarCallback() {
             @Override
             public void onComplete(Car onCompletecars) {
                 car = onCompletecars;
@@ -203,7 +200,7 @@ public class CarEditFragment extends Fragment implements GetPicture {
                         car.carCategory = category.getSelectedItem().toString();
 
                         if (imageBitmap != null) {
-                            Model.instance.saveImage(imageBitmap, Model.random() + ".jpeg", new Model.SaveImageListener() {
+                            Model.instance.saveImage(imageBitmap, Model.generateRandomId() + ".jpeg", new Model.SaveImageListener() {
                                 @Override
                                 public void complete(String url) {
                                     car.carPicture = url;

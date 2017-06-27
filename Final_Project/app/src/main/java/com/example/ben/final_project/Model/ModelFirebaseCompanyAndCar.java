@@ -44,10 +44,17 @@ import static com.example.ben.final_project.Model.CarSQL.CAR_ZERO_TO_HUNDRED;
  * Created by mazliachbe on 26/06/2017.
  */
 
-public class ModelCompanyAndCarFirebase {
+/**
+ * Firebase model that manages companies and cars tables
+ */
+public class ModelFirebaseCompanyAndCar {
 
-    List<ChildEventListener> listeners = new LinkedList<ChildEventListener>();
+    List<ChildEventListener> listeners = new LinkedList<ChildEventListener>();//todo remove all the listeners - or not?
 
+    /**
+     * Add a new company in the Firebase.
+     * @param company the company to be added.
+     */
     public void addCompany(Company company) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference(COMPANY_TABLE);
@@ -62,16 +69,28 @@ public class ModelCompanyAndCarFirebase {
         myRef.child(company.companyId).setValue(values);
     }
 
+    /**
+     * Save an edited company in the Firebase.
+     * @param company the edited company to be saved.
+     */
     public void editCompany(Company company)
     {
         addCompany(company);
     }
 
+    /**
+     * Remove logically a company from the Firebase.
+     * @param company the company to be removed.
+     */
     public void removeCompany(Company company) {
         company.wasDeleted = true;
         addCompany(company);
     }
 
+    /**
+     * Add a new car associated to a company in the Firebase.
+     * @param car the car to be added.
+     */
     public void addCar(Car car) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference(CAR_TABLE);
@@ -96,21 +115,37 @@ public class ModelCompanyAndCarFirebase {
         myRef.child(car.carID).setValue(values);
     }
 
+    /**
+     * Save an edited car in Firebase.
+     * @param car the edited car to be saved.
+     */
     public void editCar(Car car)
     {
         addCar(car);
     }
 
+    /**
+     * Remove logically a car from Firebase.
+     * @param car the car to be removed.
+     */
     public void removeCar(Car car) {
         car.wasDeleted = true;
         addCar(car);
     }
 
+    /**
+     * Callback that fires when the company returns from Firebase
+     */
     interface GetAllCompanyCarsAndObserveCallback {
         void onComplete(List<Car> list);
         void onCancel();
     }
 
+    /**
+     * Get the company's cars from Firebase async.
+     * @param companyId the id of the company.
+     * @param callback see {@link GetAllCompanyCarsAndObserveCallback}.
+     */
     public void getAllCompanyCarsAndObserve(final String companyId, final GetAllCompanyCarsAndObserveCallback callback) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference(CAR_TABLE);
@@ -133,11 +168,18 @@ public class ModelCompanyAndCarFirebase {
         });
     }
 
+    /**
+     * Callback that fires when all the cars associated to a company returns from Firebase.
+     */
     interface GetCompanyCallback {
         void onComplete(Company company);
         void onCancel();
     }
 
+    /**
+     * Get the company from Firebase async.
+     * @param callback see {@link GetCompanyCallback}.
+     */
     public void getCompany(final String companyId, final GetCompanyCallback callback) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference(COMPANY_TABLE);
@@ -166,11 +208,19 @@ public class ModelCompanyAndCarFirebase {
         });
     }
 
+    /**
+     * Callback that fires when a car associated to a company returns from Firebase.
+     */
     interface GetModelCallback {
         void onComplete(Car car);
         void onCancel();
     }
 
+    /**
+     * Get the company from Firebase async.
+     * @param carId the id of the car.
+     * @param callback see {@link GetModelCallback}.
+     */
     public void getCar(final String carId, final GetModelCallback callback) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference(CAR_TABLE);
@@ -188,11 +238,18 @@ public class ModelCompanyAndCarFirebase {
         });
     }
 
-
+    /**
+     * Callback fires when the Firebase return the company
+     */
     interface RegisterCompanysUpdatesCallback{
         void onCarCompanyUpdate(Company company);
     }
 
+    /**
+     * Register to get all the diffs from companies table Firebase - the logic from the sync classes
+     * @param lastUpdateDate get all the companies that companies.lastUpdateDate > lastUpdateDate from sharedPref
+     * @param callback see {@link RegisterCompanysUpdatesCallback}
+     */
     public void registerCompanysUpdates(double lastUpdateDate,
                                         final RegisterCompanysUpdatesCallback callback) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -233,10 +290,18 @@ public class ModelCompanyAndCarFirebase {
         listeners.add(listener);
     }
 
+    /**
+     * Callback fires when the Firebase return the car
+     */
     interface RegisterCarsUpdatesCallback{
         void onCarUpdate(Car car);
     }
 
+    /**
+     * Register to get all the diffs from cars table Firebase - the logic from the sync classes
+     * @param lastUpdateDate get all the cars that cars.lastUpdateDate > lastUpdateDate from sharedPref
+     * @param callback see {@link RegisterCompanysUpdatesCallback}
+     */
     public void registerCarsUpdates(double lastUpdateDate,
                                         final RegisterCarsUpdatesCallback callback) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -276,5 +341,4 @@ public class ModelCompanyAndCarFirebase {
                 });
         listeners.add(listener);
     }
-    
 }

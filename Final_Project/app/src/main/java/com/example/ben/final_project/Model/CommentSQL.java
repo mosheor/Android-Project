@@ -12,8 +12,12 @@ import java.util.List;
  * Created by mazliachbe on 26/06/2017.
  */
 
+/**
+ * CommentSQL handler class for comments table
+ */
 public class CommentSQL {
 
+    //the tables and columns we use as a reference
     static final String COMMENT_TABLE = "comments";
     static final String COMMENT_ID = "commentID";
     static final String COMMENT_AUTHOR = "author";
@@ -21,6 +25,12 @@ public class CommentSQL {
     static final String COMMENT_LAST_UPDATED = "lastUpdatedDate";
     static final String COMMENT_ARTICLE_ID = "articleID";
 
+    /**
+     * get all comments associated to an article from comments table by specifying articleId
+     * @param db the SQLiteDatabase readable db
+     * @param articleId the id of the article
+     * @return list of all the comments if exists, else an empty list
+     */
     static List<Comment> getArticleComments(SQLiteDatabase db , String articleId) {
         Log.d("TAG","get all articles comment");
         Cursor cursor = db.query(COMMENT_TABLE, null, null,null, null, null, null);
@@ -49,6 +59,11 @@ public class CommentSQL {
         return list;
     }
 
+    /**
+     * add a comment to the comments table
+     * @param db the SQLiteDatabase writable db
+     * @param comment the comment obj to be added
+     */
     static void addComment(SQLiteDatabase db, Comment comment) {
         Log.d("TAG","addComment commentsql");
         ContentValues values = new ContentValues();

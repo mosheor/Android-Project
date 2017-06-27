@@ -149,7 +149,7 @@ public class ArticleEditFragment extends Fragment implements GetPicture {
                         article.content = content.getText().toString();
 
                         if (imageBitmap != null) {
-                            Model.instance.saveImage(imageBitmap, Model.random() + ".jpeg", new Model.SaveImageListener() {
+                            Model.instance.saveImage(imageBitmap, Model.generateRandomId() + ".jpeg", new Model.SaveImageListener() {
                                 @Override
                                 public void complete(String url) {
                                     article.imageUrl = url;

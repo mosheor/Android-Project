@@ -8,6 +8,10 @@ import android.util.AttributeSet;
 import android.widget.TextView;
 
 
+/**
+ * UnderlinedBoldTextView class - in order to set automatically an underlined
+ * and bold android.widget.TextView
+ */
 @SuppressLint("AppCompatCustomView")
 public class UnderlinedBoldTextView extends TextView {
     public UnderlinedBoldTextView(Context context) {

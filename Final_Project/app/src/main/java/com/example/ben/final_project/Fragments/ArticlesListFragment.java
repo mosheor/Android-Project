@@ -43,6 +43,7 @@ public class ArticlesListFragment extends Fragment{
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //subscribe to the EventBus
         EventBus.getDefault().register(this);
     }
 
@@ -136,6 +137,7 @@ public class ArticlesListFragment extends Fragment{
 
     @Override
     public void onDestroy() {
+        //unsubscribe the EventBus
         EventBus.getDefault().unregister(this);
         super.onDestroy();
     }

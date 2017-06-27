@@ -45,10 +45,17 @@ import static com.example.ben.final_project.Model.CommentSQL.COMMENT_TABLE;
  * Created by mazliachbe on 26/06/2017.
  */
 
-public class ModelArticleAndCommentFirebase {
+/**
+ * Firebase model that manages articles and comments tables
+ */
+public class ModelFirebaseArticleAndComment {
 
-    List<ChildEventListener> listeners = new LinkedList<ChildEventListener>();
+    List<ChildEventListener> listeners = new LinkedList<ChildEventListener>();//todo remove all the listeners - or not?
 
+    /**
+     * Add new article and save it remotely
+     * @param article the article to be saved
+     */
     public void addArticle(Article article) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference(ARTICLE_TABLE);
@@ -66,6 +73,10 @@ public class ModelArticleAndCommentFirebase {
         myRef.child(article.articleID).setValue(values);
     }
 
+    /**
+     * Save an edited article in the Firebase.
+     * @param article the edited article to be saved.
+     */
     public void editArticle(Article article)
     {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -86,11 +97,19 @@ public class ModelArticleAndCommentFirebase {
         setValue(values);
     }
 
+    /**
+     * Logically delete an article remotely
+     * @param article the article to be removed.
+     */
     public void removeArticle(Article article) {
         article.wasDeleted = true;
         addArticle(article);
     }
 
+    /**
+     * Add new comment associated to an article and save it remotely
+     * @param comment the comment to be saved.
+     */
     public void addComment(Comment comment) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference(COMMENT_TABLE);
@@ -104,11 +123,20 @@ public class ModelArticleAndCommentFirebase {
         myRef.child(comment.commentID).setValue(values);
     }
 
+    /**
+     * GetAllArticleCommentsAndObserveCallback interface for the async Firebase.
+     * function to get list of all the comments (diffs) and observe.
+     */
     interface GetAllArticleCommentsAndObserveCallback {
         void onComplete(List<Comment> list);
         void onCancel();
     }
 
+    /**
+     * get all comments async from Firebase and observe the ref.
+     * @param articleId the id of the article.
+     * @param callback see {@link GetAllArticleCommentsAndObserveCallback}
+     */
     public void getAllArticleCommentsAndObserve(final String articleId, final GetAllArticleCommentsAndObserveCallback callback) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference(COMMENT_TABLE);
@@ -131,12 +159,12 @@ public class ModelArticleAndCommentFirebase {
         });
     }
 
-    interface GetArticleCallback {
-        void onComplete(Article article);
-        void onCancel();
-    }
-
-    public void getArticle(final String articleId, final GetArticleCallback callback) {
+    /**
+     * Get an article from Firebase async.
+     * @param articleId the id of the article.
+     * @param callback see {@link Model.GetArticleCallback}.
+     */
+    public void getArticle(final String articleId, final Model.GetArticleCallback callback) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference(ARTICLE_TABLE);
         myRef.child(articleId).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -153,10 +181,18 @@ public class ModelArticleAndCommentFirebase {
         });
     }
 
+    /**
+     * Callback fires when the Firebase return the article
+     */
    interface RegisterArticlesUpdatesCallback{
         void onArticleUpdate(Article article);
     }
 
+    /**
+     * Register to get all the diffs from articles table Firebase - the logic from the sync classes
+     * @param lastUpdateDate get all the articles that articles.lastUpdateDate > lastUpdateDate from sharedPref
+     * @param callback see {@link RegisterArticlesUpdatesCallback}
+     */
     public void registerArticlesUpdates(double lastUpdateDate,
                                         final RegisterArticlesUpdatesCallback callback) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -197,10 +233,18 @@ public class ModelArticleAndCommentFirebase {
         listeners.add(listener);
     }
 
+    /**
+     * Callback fires when the Firebase return the comment
+     */
     interface RegisterComentsUpdatesCallback{
         void onCommentUpdate(Comment comment);
     }
 
+    /**
+     * Register to get all the diffs from comments table Firebase - the logic from the sync classes
+     * @param lastUpdateDate get all the comments that comments.lastUpdateDate > lastUpdateDate from sharedPref
+     * @param callback see {@link RegisterArticlesUpdatesCallback}
+     */
     public void registerCommentsUpdates(double lastUpdateDate,
                                         final RegisterComentsUpdatesCallback callback) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();

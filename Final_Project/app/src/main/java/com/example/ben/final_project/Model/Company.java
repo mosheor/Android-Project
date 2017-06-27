@@ -13,5 +13,5 @@ public class Company {
     public String companyLogo;
     public String companyDescription;
     public double lastUpdatedDate;
-    public boolean wasDeleted;
+    public boolean wasDeleted; //logical deletion
 }

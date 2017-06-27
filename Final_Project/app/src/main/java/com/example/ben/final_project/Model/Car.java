@@ -25,5 +25,5 @@ public class Car {
     public float zeroToHundred;
     public float fuelConsumption;
     public double lastUpdatedDate;
-    public boolean wasDeleted;
+    public boolean wasDeleted;//logical deletion
 }

@@ -12,8 +12,12 @@ import java.util.List;
  * Created by mazliachbe on 26/06/2017.
  */
 
+/**
+ * ArticleSQL handler class for articles table
+ */
 public class ArticleSQL {
 
+    //the tables and columns we use as a reference
     static final String ARTICLE_TABLE = "articles";
     static final String ARTICLE_ID = "articleID";
     static final String ARTICLE_IMAGE_URL = "imageUrl";
@@ -25,6 +29,11 @@ public class ArticleSQL {
     static final String ARTICLE_LAST_UPDATE = "lastUpdateDate";
     static final String ARTICLE_WAS_DELETED = "wasDeleted";
 
+    /**
+     * get all the articles from articles table
+     * @param db the SQLiteDatabase readable db
+     * @return list of all the articles if exists, else an empty list
+     */
     static List<Article> getAllArticles(SQLiteDatabase db) {
         Cursor cursor = db.query(ARTICLE_TABLE, null, ARTICLE_WAS_DELETED + " = ?", new String[]    {"0"}, null, null, null);
         List<Article> list = new LinkedList<Article>();
@@ -59,6 +68,11 @@ public class ArticleSQL {
         return list;
     }
 
+    /**
+     * add a new article to articles table
+     * @param db the SQLiteDatabase writable db
+     * @param article the article to be added
+     */
     static void addNewArticle(SQLiteDatabase db, Article article) {
         ContentValues values = new ContentValues();
         values.put(ARTICLE_ID, article.articleID);
@@ -78,9 +92,14 @@ public class ArticleSQL {
         db.insert(ARTICLE_TABLE, ARTICLE_ID, values);
     }
 
+    /**
+     * get a specific article from articles table
+     * @param db the SQLiteDatabase readable db
+     * @param articleId the id of the article
+     * @return the article if exists, else null
+     */
     static Article getArticle(SQLiteDatabase db, String articleId) {
         Cursor cursor = db.query(ARTICLE_TABLE, null, ARTICLE_ID + " = ?", new String[] { articleId }, null, null, null);
-        List<Article> list = new LinkedList<Article>();
         if (cursor.moveToFirst()) {
             int idIndex = cursor.getColumnIndex(ARTICLE_ID);
             int imageUrlIndex = cursor.getColumnIndex(ARTICLE_IMAGE_URL);
@@ -111,11 +130,14 @@ public class ArticleSQL {
                     Log.d("TAG","can not give correct article articleID " + articleId + " from sql");
             } while (cursor.moveToNext());
         }
-
-
         return null;
     }
 
+    /**
+     * edit a specific article from articles table
+     * @param db the SQLiteDatabase readable db
+     * @param article the edited article to be saved
+     */
     static public void editArticle(SQLiteDatabase db, Article article){
         ContentValues values = new ContentValues();
         values.put(ARTICLE_ID, article.articleID);
@@ -146,7 +168,6 @@ public class ArticleSQL {
                 ARTICLE_PUBLISH_DATE + " NUMBER, " +
                 ARTICLE_SUB_TITLE + " TEXT, " +
                 ARTICLE_WAS_DELETED + " NUMBER);";
-        Log.d("TAG",sql);
         db.execSQL(sql);
     }
 

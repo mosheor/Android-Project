@@ -22,9 +22,34 @@ import java.io.OutputStream;
  * Created by mazliachbe on 26/06/2017.
  */
 
+/**
+ * ModelLocalFiles class to handle local storage pictures save and load
+ */
 public class ModelLocalFiles {
 
-    static void saveImageToFile(Bitmap imageBitmap, String imageFileName){
+    /**
+     * Save an image ASYNC locally.
+     * @param imageBitmap the Bitmap image to be saved.
+     * @param imageFileName the name of the generated save file.
+     */
+    static void saveImageToFileAsynch(Bitmap imageBitmap, String imageFileName){
+        AsyncTask<Object,String,Boolean> task = new AsyncTask<Object,String,Boolean>() {
+            @Override
+            protected Boolean doInBackground(Object... params) {
+                saveImageToFile((Bitmap)params[0], (String)params[1]);
+                return true;
+            }
+        };
+        task.execute(imageBitmap, imageFileName);
+    }
+
+    /**
+     * Save an image SYNC locally.
+     * @param imageBitmap the Bitmap image to be saved.
+     * @param imageFileName the name of the generated save file.
+     */
+    //todo - asyncTask!!
+    private static void saveImageToFile(Bitmap imageBitmap, String imageFileName){
         try {
             File dir = Environment.getExternalStoragePublicDirectory(
                     Environment.DIRECTORY_PICTURES);
@@ -38,7 +63,7 @@ public class ModelLocalFiles {
             imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
             out.close();
 
-            //addPicureToGallery(imageFile);
+            //addPicureToGallery(imageFile); //todo ???
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -46,9 +71,18 @@ public class ModelLocalFiles {
         }
     }
 
+    /**
+     * Callback that fires when the bitmap image is returned from local storage
+     */
     interface LoadImageFromFileAsynch{
         void onComplete(Bitmap bitmap);
     }
+
+    /**
+     * Get an image locally if exists in storage ASYNC.
+     * @param imageFileName name of the image.
+     * @param callback see {@link LoadImageFromFileAsynch}.
+     */
     static void loadImageFromFileAsynch(String imageFileName,
                                         final LoadImageFromFileAsynch callback) {
         AsyncTask<String,String,Bitmap> task = new AsyncTask<String,String,Bitmap>(){
@@ -66,7 +100,10 @@ public class ModelLocalFiles {
         task.execute(imageFileName);
     }
 
-
+    /**
+     * Get an image locally if exists in storage SYNC.
+     * @param imageFileName name of the image.
+     */
     private static Bitmap loadImageFromFile(String imageFileName){
         Bitmap bitmap = null;
         try {
@@ -83,8 +120,9 @@ public class ModelLocalFiles {
         return bitmap;
     }
 
+    //todo - why not in use?
     private static void addPicureToGallery(File imageFile){
-        //add the picture to the gallery so we dont need to manage the cache size
+        //add the picture to the gallery so we won't need to manage the pictures cache
         Intent mediaScanIntent = new
                 Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
         Uri contentUri = Uri.fromFile(imageFile);

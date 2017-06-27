@@ -95,7 +95,7 @@ public class ArticleAddFragment extends Fragment implements GetPicture {
                     if (save == true) {
                         final Article article = new Article();
                         article.comments = new LinkedList<Comment>();
-                        article.articleID = Model.random();
+                        article.articleID = Model.generateRandomId();
                         article.publishDate = 0;
                         article.author = author.getText().toString();
                         article.mainTitle = mainTitle.getText().toString();
@@ -104,7 +104,7 @@ public class ArticleAddFragment extends Fragment implements GetPicture {
                         article.wasDeleted = false;
 
                         if (imageBitmap != null) {
-                            Model.instance.saveImage(imageBitmap,  Model.random()  + ".jpeg", new Model.SaveImageListener() {
+                            Model.instance.saveImage(imageBitmap,  Model.generateRandomId()  + ".jpeg", new Model.SaveImageListener() {
                                 @Override
                                 public void complete(String url) {
                                     article.imageUrl = url;

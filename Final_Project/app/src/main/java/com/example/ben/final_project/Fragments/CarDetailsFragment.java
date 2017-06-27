@@ -62,7 +62,7 @@ public class CarDetailsFragment extends Fragment {
         final ProgressBar progressBar = (ProgressBar) containerView.findViewById(R.id.car_details_progressBar);
         progressBar.setVisibility(GONE);
 
-        Model.instance.getCar(companyID, carID, new Model.GetModelCallback() {
+        Model.instance.getCar(companyID, carID, new Model.GetCarCallback() {
             @Override
             public void onComplete(Car car) {
                 carData = car;

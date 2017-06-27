@@ -12,8 +12,12 @@ import java.util.List;
  * Created by mazliachbe on 27/06/2017.
  */
 
+/**
+ * CompanySQL handler class for companies table
+ */
 public class CompanySQL {
 
+    //the tables and columns we use as a reference
     static final String COMPANY_TABLE = "companies";
     static final String COMPANY_ID = "companyId";
     static final String COMPANY_NAME = "name";
@@ -22,6 +26,12 @@ public class CompanySQL {
     static final String COMPANY_LAST_UPDATED = "lastUpdatedDate";
     static final String COMPANY_WAS_DELETED = "wasDeleted";
 
+
+    /**
+     * get all the companies from companies table
+     * @param db the SQLiteDatabase readable db
+     * @return list of all the companies from the table, if empty - an empty list
+     */
     static List<Company> getAllCompanies(SQLiteDatabase db) {
         Cursor cursor = db.query(COMPANY_TABLE, null, COMPANY_WAS_DELETED + " = ?", new String[] {"0"}, null, null, null);
         List<Company> list = new LinkedList<Company>();
@@ -40,7 +50,7 @@ public class CompanySQL {
                 company.companyDescription = cursor.getString(descriptionIndex);
                 company.lastUpdatedDate = cursor.getDouble(lastUpdatedIndex);
                 if(company.wasDeleted == false) {
-                    company.models = CarSQL.getCompanyModels(db, company.companyId);
+                    company.models = CarSQL.getCompanyCars(db, company.companyId);
                     list.add(company);
                 }
             } while (cursor.moveToNext());
@@ -48,6 +58,11 @@ public class CompanySQL {
         return list;
     }
 
+    /**
+     * add a company to companies table
+     * @param db the sqlite writable db
+     * @param company the company to be added
+     */
     static void addNewCompany(SQLiteDatabase db, Company company) {
         ContentValues values = new ContentValues();
         values.put(COMPANY_ID, company.companyId);
@@ -63,6 +78,12 @@ public class CompanySQL {
         db.insert(COMPANY_TABLE, COMPANY_ID, values);
     }
 
+    /**
+     * get a company from companies table by its Id
+     * @param db the SQLiteDatabase readable db
+     * @param companyId id of the company
+     * @return if exists - the company we want to get, else null
+     */
     static Company getCompany(SQLiteDatabase db, String companyId) {
         Cursor cursor = db.query(COMPANY_TABLE, null, COMPANY_ID + " = ?", new String[] { companyId }, null, null, null);
         List<Company> list = new LinkedList<Company>();
@@ -83,7 +104,7 @@ public class CompanySQL {
                     company.companyDescription = cursor.getString(descriptionIndex);
                     company.lastUpdatedDate = cursor.getDouble(lastUpdatedIndex);
                     company.wasDeleted = (cursor.getInt(wasDeletedIndex) == 1);
-                    company.models = CarSQL.getCompanyModels(db,company.companyId);
+                    company.models = CarSQL.getCompanyCars(db,company.companyId);
                     return company;
                 }
                 else
@@ -93,6 +114,11 @@ public class CompanySQL {
         return null;
     }
 
+    /**
+     * edit a company from companies table
+     * @param db the SQLiteDatabase writable db
+     * @param company the edited company to be saved
+     */
     static public void editCompany(SQLiteDatabase db, Company company){
         ContentValues values = new ContentValues();
         values.put(COMPANY_ID, company.companyId);

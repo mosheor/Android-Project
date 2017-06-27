@@ -75,6 +75,7 @@ public class CarListFragment extends Fragment {
         if (getArguments() != null) {
             companyId = getArguments().getString(ARG_PARAM1);
         }
+        //subscribe to the EventBus
         EventBus.getDefault().register(this);
 
     }
@@ -82,6 +83,7 @@ public class CarListFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        //unsubscribe the EventBus
         EventBus.getDefault().unregister(this);
     }
 
@@ -96,7 +98,7 @@ public class CarListFragment extends Fragment {
             @Override
             public void onComplete(Company onCompleteCompany) {
                 company = onCompleteCompany;
-                Model.instance.getCompanyModels(companyId, new Model.GetCompanyModelsCallback() {
+                Model.instance.getCompanyCars(companyId, new Model.GetCompanyCarsCallback() {
                     @Override
                     public void onComplete(List<Car> onCompleteList) {
                         carsData = onCompleteList;

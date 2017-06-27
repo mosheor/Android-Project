@@ -3,7 +3,7 @@ package com.example.ben.final_project.Model;
 import java.util.List;
 
 public class Article {
-    public String articleID;//defult
+    public String articleID;
     public String imageUrl;
     public String mainTitle;
     public String subTitle;
@@ -12,5 +12,5 @@ public class Article {
     public String content;
     public List<Comment> comments;
     public double lastUpdateDate;
-    public boolean wasDeleted;
+    public boolean wasDeleted;//logical deletion
 }

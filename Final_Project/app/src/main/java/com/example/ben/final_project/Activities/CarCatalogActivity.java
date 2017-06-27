@@ -206,7 +206,7 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
                 currentFragment = CATALOG_CAR_LIST;
                 break;
             case CATALOG_CAR_DETAILS:
-                Model.instance.getCar(companyClickedID, id, new Model.GetModelCallback() {
+                Model.instance.getCar(companyClickedID, id, new Model.GetCarCallback() {
                     @Override
                     public void onComplete(Car car) {
                         carClickedID = car.carID;
