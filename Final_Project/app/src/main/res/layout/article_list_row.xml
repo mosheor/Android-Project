@@ -5,16 +5,28 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <!--change image - just example-->
-    <ImageView
-        android:id="@+id/row_article_image"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
-        android:src="@drawable/car"
-        android:layout_gravity="center"
-        />
+        android:layout_marginTop="10dp">
+        <ImageView
+            android:id="@+id/row_article_image"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_gravity="center"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/car" />
+        <ProgressBar
+            android:id="@+id/row_article_progressBar"
+            android:layout_gravity="center_horizontal|center_vertical"
+            android:layout_width="100dp"
+            android:visibility="gone"
+            android:layout_height="100dp" />
+    </FrameLayout>
+    <!--change image - just example-->
 
     <TextView
         android:id="@+id/row_main_article_title"

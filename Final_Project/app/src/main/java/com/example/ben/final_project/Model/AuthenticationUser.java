@@ -74,7 +74,7 @@ public class AuthenticationUser {
         mAuth.signOut();
     }
 
-    public void getCurrentUserData(){
+   /* public void getCurrentUserData(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
             // Name, email address, and profile photo Url
@@ -90,5 +90,5 @@ public class AuthenticationUser {
             // FirebaseUser.getToken() instead.
             String uid = String.valueOf(user.getIdToken(true));
         }
-    }
+    }*/
 }

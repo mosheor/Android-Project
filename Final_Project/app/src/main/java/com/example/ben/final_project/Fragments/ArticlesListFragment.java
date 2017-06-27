@@ -3,6 +3,7 @@ package com.example.ben.final_project.Fragments;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -13,6 +14,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -172,12 +174,36 @@ public class ArticlesListFragment extends Fragment{
                 convertView = inflater.inflate(R.layout.article_list_row,null);
             }
 
-            ImageView articleImage = (ImageView) convertView.findViewById(R.id.row_article_image);
+            final ImageView articleImage = (ImageView) convertView.findViewById(R.id.row_article_image);
             TextView articleMainTitle = (TextView) convertView.findViewById(R.id.row_main_article_title);
+            final ProgressBar progressBar = (ProgressBar) convertView.findViewById(R.id.row_article_progressBar);
 
-            Article article = articlesData.get(getCount() - position - 1);
-            articleImage.setImageResource(R.drawable.car);//TODO: change for specific image
+            final Article article = articlesData.get(getCount() - position - 1);
             articleMainTitle.setText(article.mainTitle);
+
+            articleImage.setTag(article.imageUrl);
+
+            if (article.imageUrl != null && !article.imageUrl.isEmpty() && !article.imageUrl.equals("")){
+                progressBar.setVisibility(View.VISIBLE);
+                Model.instance.getImage(article.imageUrl, new Model.GetImageListener() {
+                    @Override
+                    public void onSuccess(Bitmap image) {
+                        String tagUrl = articleImage.getTag().toString();
+                        if (tagUrl.equals(article.imageUrl)) {
+                            articleImage.setImageBitmap(image);
+                            progressBar.setVisibility(View.GONE);
+                        }
+                    }
+
+                    @Override
+                    public void onFail() {
+                        progressBar.setVisibility(View.GONE);
+                    }
+                });
+            }
+            else
+                articleImage.setImageResource(R.drawable.car_icon);
+
             Log.d("TAG","art num" + position);
 
             return convertView;

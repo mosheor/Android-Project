@@ -11,12 +11,12 @@ import java.util.List;
 
 public class CompanyModel {
 
-    private List<CarCompany> companysData = new LinkedList<CarCompany>();
+    private List<Company> companysData = new LinkedList<Company>();
 
     public CompanyModel(){
         for (int i = 0; i<10;i++){
-            CarCompany company = new CarCompany();
-            company.id = ""+i;
+            Company company = new Company();
+            company.companyId = ""+i;
             company.name = "Company " + i;
             company.companyDescription = "Company " + i + " is the best cars company " +
                     "in the world";
@@ -27,7 +27,7 @@ public class CompanyModel {
                 car.carID = ""+j;
                 car.companyID = ""+i;
                 car.companyName = company.name;
-                car.modelName = "Model number " + j;
+                car.carName = "Model number " + j;
                 car.carPicture = "";
                 car.description = "car " + j + "in company " + i;
                 car.engineVolume = i * 200 + j * 10;
@@ -41,14 +41,14 @@ public class CompanyModel {
         }
     }
 
-    public List<CarCompany> getAllCompanies(){
+    public List<Company> getAllCompanies(){
         return companysData;
     }
 
-    public CarCompany getCompany(String companyID) {
+    public Company getCompany(String companyID) {
         Log.d("TAG","getCompany number " + companyID);
-        for(CarCompany company : companysData){
-            if (company.id.equals(companyID)) {
+        for(Company company : companysData){
+            if (company.companyId.equals(companyID)) {
                 Log.d("TAG","boom");
                 return company;
             }
@@ -58,8 +58,8 @@ public class CompanyModel {
 
     public List<Car> getCompanyModels(String companyID) {
         Log.d("TAG","getCompany number " + companyID);
-        for(CarCompany company : companysData){
-            if (company.id.equals(companyID)) {
+        for(Company company : companysData){
+            if (company.companyId.equals(companyID)) {
                 Log.d("TAG","boom");
                 return company.models;
             }
@@ -69,8 +69,8 @@ public class CompanyModel {
 
     public Car getCar(String companyID,String carID) {
         Log.d("TAG","getCar company number " + companyID + " and car number " + carID);
-        for(CarCompany company : companysData){
-            if (company.id.equals(companyID)) {
+        for(Company company : companysData){
+            if (company.companyId.equals(companyID)) {
                 for(Car car : company.models) {
                     if(car.carID.equals(carID)) {
                         Log.d("TAG", "boom");
@@ -82,7 +82,7 @@ public class CompanyModel {
         return null;
     }
 
-    public void addNewCompany(CarCompany company){
+    public void addNewCompany(Company company){
         companysData.add(company);
     }
 
@@ -90,10 +90,10 @@ public class CompanyModel {
         return companysData.size();
     }
 
-    public boolean editCompany(CarCompany editedCompany) {
-        Log.d("TAG","editedCompany number " + editedCompany.id);
-        for(CarCompany company : companysData){
-            if (company.id.equals(editedCompany.id)) {
+    public boolean editCompany(Company editedCompany) {
+        Log.d("TAG","editedCompany number " + editedCompany.companyId);
+        for(Company company : companysData){
+            if (company.companyId.equals(editedCompany.companyId)) {
                 company.name = editedCompany.name;
                 company.companyLogo = editedCompany.companyLogo;
                 company.companyDescription = editedCompany.companyDescription;
@@ -106,8 +106,8 @@ public class CompanyModel {
     public boolean removeCompany(String id){
         for (int i = 0; i < companysData.size(); i++)
         {
-            CarCompany company = companysData.get(i);
-            if (company.id.equals(id))
+            Company company = companysData.get(i);
+            if (company.companyId.equals(id))
             {
                 companysData.remove(i);
                 return true;
@@ -119,8 +119,8 @@ public class CompanyModel {
     public boolean removeModel(String companyId,String modelId){
         for (int i = 0; i < companysData.size(); i++)
         {
-            CarCompany company = companysData.get(i);
-            if (company.id.equals(companyId))
+            Company company = companysData.get(i);
+            if (company.companyId.equals(companyId))
             {
                 for(int j=0;j<company.models.size();j++) {
                     Car car = company.models.get(j);
@@ -136,8 +136,8 @@ public class CompanyModel {
 
     public void addNewModel(String companyId,Car car){
         Log.d("TAG","addNewModel company number " + companyId);
-        for(CarCompany company : companysData){
-            if (company.id.equals(companyId)) {
+        for(Company company : companysData){
+            if (company.companyId.equals(companyId)) {
                 Log.d("TAG","boom");
                 company.models.add(car);
             }
@@ -149,8 +149,8 @@ public class CompanyModel {
     }
 
     public Car getModel(String companyId,String carId) {
-        for(CarCompany company : companysData){
-            if (company.id.equals(companyId)) {
+        for(Company company : companysData){
+            if (company.companyId.equals(companyId)) {
                 for(Car car : company.models) {
                     if (car.carID.equals(carId)){
                         Log.d("TAG", "boom");
@@ -164,16 +164,16 @@ public class CompanyModel {
 
     public boolean editModel(String companyId,Car editCar) {
         Log.d("TAG","editModel number " + editCar.carID);
-        for(CarCompany company : companysData){
-            if (companyId.equals(company.id)) {
+        for(Company company : companysData){
+            if (companyId.equals(company.companyId)) {
                 for(Car car : company.models){
                     if (car.carID.equals(editCar.carID)) {
                         //car = editCar; // todo check if this line can change all the lines down here??
-                        car.modelName = editCar.modelName;
+                        car.carName = editCar.carName;
                         car.hp = editCar.hp;
                         car.pollution = editCar.pollution;
                         car.fuelConsumption = editCar.fuelConsumption;
-                        car.zeroToHundrend = editCar.zeroToHundrend;
+                        car.zeroToHundred = editCar.zeroToHundred;
                         car.carPicture = editCar.carPicture;
                         car.description = editCar.description;
                         car.engineVolume = editCar.engineVolume;

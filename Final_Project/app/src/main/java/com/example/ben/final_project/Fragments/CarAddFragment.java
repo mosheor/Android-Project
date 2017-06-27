@@ -16,6 +16,7 @@ import android.widget.Spinner;
 
 import com.example.ben.final_project.Activities.FragmentsDelegate;
 import com.example.ben.final_project.Model.Car;
+import com.example.ben.final_project.Model.Company;
 import com.example.ben.final_project.Model.Model;
 import com.example.ben.final_project.R;
 
@@ -54,12 +55,12 @@ public class CarAddFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d("TAG","CarAddFragment onCreateView");
         View containerView = inflater.inflate(R.layout.fragment_add_car, container, false);
-        final String companyID = Model.instance.getAllCompanies().get(Integer.parseInt(companyId)).id;
+        final String companyID = companyId;
         final String newCarID;
-        if(Integer.parseInt(carId) > 0)
-            newCarID = Model.instance.getAllCompanies().get(Integer.parseInt(carId) - 1).id + 1;
+        /*if(Integer.parseInt(carId) > 0)
+            newCarID = Model.instance.getAllCompanies().get(Integer.parseInt(carId) - 1). + 1;
         else
-            newCarID = "0";
+            newCarID = "0";*/
 
         Button saveButton = (Button) containerView.findViewById(R.id.add_model_save_button);
         Button cancelButton = (Button) containerView.findViewById(R.id.add_model_cancel_button);
@@ -76,8 +77,19 @@ public class CarAddFragment extends Fragment {
         final EditText engineVolume = (EditText) containerView.findViewById(R.id.add_car_engine_volume);
         final Spinner category = (Spinner) containerView.findViewById(R.id.add_car_category);
 
-        companyName.setText(Model.instance.getCompany(companyID).name);
-        companyName.setEnabled(false);
+        Model.instance.getCompany(companyID, new Model.GetCompanyCallback() {
+            @Override
+            public void onComplete(Company company) {
+                companyName.setText(company.name);
+                companyName.setEnabled(false);
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+        });
+
         ArrayAdapter<CharSequence> categoryAdapter = ArrayAdapter.createFromResource(this.getActivity(), R.array.car_category_array, android.R.layout.simple_spinner_item);
         categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         category.setAdapter(categoryAdapter);
@@ -113,12 +125,12 @@ public class CarAddFragment extends Fragment {
 
                 if(save == true) {
                     Car car = new Car();
-                    car.carID = newCarID;
-                    car.modelName = carName.getText().toString();
+                    car.carID = Model.random();
+                    car.carName = carName.getText().toString();
                     car.hp = Integer.parseInt(hp.getText().toString());
                     car.pollution = Integer.parseInt(pollusion.getText().toString());
                     car.fuelConsumption = Float.parseFloat(fuelConsumption.getText().toString());
-                    car.zeroToHundrend = Float.parseFloat(zeroToHundrend.getText().toString());
+                    car.zeroToHundred = Float.parseFloat(zeroToHundrend.getText().toString());
                     car.carPicture = picture.getText().toString();
                     car.companyName = companyName.getText().toString();
                     car.companyID = companyID;
@@ -127,7 +139,8 @@ public class CarAddFragment extends Fragment {
                     car.warranty = Integer.parseInt(warranty.getText().toString());
                     car.price = Float.parseFloat(price.getText().toString());
                     car.carCategory = category.getSelectedItem().toString();
-                    Model.instance.addNewModel(car.companyID,car);
+                    //TODO: add spinner
+                    Model.instance.addNewModelToCompany(car.companyID,car);
 
                     listener.onAction(CATALOG_CAR_ADD,null);
                 }

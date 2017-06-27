@@ -4,6 +4,7 @@ package com.example.ben.final_project.Fragments;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,19 +12,28 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.example.ben.final_project.Activities.FragmentsDelegate;
-import com.example.ben.final_project.Model.CarCompany;
+import com.example.ben.final_project.Activities.GetPicture;
+import com.example.ben.final_project.Model.Company;
 import com.example.ben.final_project.Model.Model;
 import com.example.ben.final_project.R;
 
+import static android.view.View.GONE;
+import static com.example.ben.final_project.Activities.ArticlesActivity.ARTICLE_EDIT;
+import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALOG_ADD_PICTURE;
 import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALOG_COMPANY_EDIT;
 
-public class CompanyEditFragment extends Fragment {
+public class CompanyEditFragment extends Fragment implements GetPicture {
     private static final String ARG_PARAM1 = "param1";//company articleID
     private String companyId;
-    CarCompany company;
+    Company company;
     private FragmentsDelegate listener;
+    ImageView imageUrl;
+    ProgressBar progressBar;
+    Bitmap imageBitmap;
 
     public static CompanyEditFragment newInstance(String param1) {
         CompanyEditFragment fragment = new CompanyEditFragment();
@@ -54,14 +64,38 @@ public class CompanyEditFragment extends Fragment {
         Button cancelButton = (Button) containerView.findViewById(R.id.edit_company_cancel_button);
         Button deleteButton = (Button) containerView.findViewById(R.id.edit_company_delete_button);
         final EditText companyName = (EditText) containerView.findViewById(R.id.edit_company_name);
-        final EditText companyImg = (EditText) containerView.findViewById(R.id.edit_company_image);
         final EditText description = (EditText) containerView.findViewById(R.id.edit_company_description);
+        imageUrl = (ImageView) containerView.findViewById(R.id.edit_article_image);
+        progressBar = (ProgressBar) containerView.findViewById(R.id.edit_company_progressBar);
+        progressBar.setVisibility(GONE);
 
-        company = new CarCompany();
-        company = Model.instance.getCompany(companyId);
-        companyName.setText(company.name);
-        companyImg.setText(company.companyLogo);
-        description.setText(company.companyDescription);
+        company = new Company();
+        Model.instance.getCompany(companyId, new Model.GetCompanyCallback() {
+            @Override
+            public void onComplete(Company onCompleteCompany) {
+                company = onCompleteCompany;
+                companyName.setText(company.name);
+                description.setText(company.companyDescription);
+                progressBar.setVisibility(View.VISIBLE);
+                Model.instance.getImage(company.companyLogo, new Model.GetImageListener() {
+                    @Override
+                    public void onSuccess(Bitmap image) {
+                        imageUrl.setImageBitmap(image);
+                        progressBar.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onFail() {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+        });
 
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,14 +106,13 @@ public class CompanyEditFragment extends Fragment {
                 boolean save = true;
 
                 ok += valid(companyName,"Main title is required!");//TODO:write errors in hebrew
-                ok += valid(companyImg,"Author name is required!");
                 ok += valid(description,"Content is required!");
 
-                if(ok != 3)
+                if(ok != 2)
                     save = false;
                 else{
                     if(companyName.getText().toString().compareTo(company.name) == 0)
-                        if(companyImg.getText().toString().compareTo(company.companyLogo) == 0)
+                        if(imageBitmap != null)
                             if(description.getText().toString().compareTo(company.companyDescription) == 0)
                                         save = false;
 
@@ -87,11 +120,34 @@ public class CompanyEditFragment extends Fragment {
 
                 if(save == true) {
                     company.name = companyName.getText().toString();
-                    company.companyLogo = companyImg.getText().toString();
                     company.companyDescription = description.getText().toString();
 
-                    if(Model.instance.editCompany(company))
-                        listener.onAction(CATALOG_COMPANY_EDIT,null);
+
+                    if (imageBitmap != null) {
+                        Model.instance.saveImage(imageBitmap, Model.random() + ".jpeg", new Model.SaveImageListener() {
+                            @Override
+                            public void complete(String url) {
+                                company.companyLogo = url;
+                                Model.instance.editCompany(company);
+                                listener.onAction(CATALOG_COMPANY_EDIT,null);
+                                progressBar.setVisibility(GONE);
+                                listener.onAction(ARTICLE_EDIT, null);
+                            }
+
+                            @Override
+                            public void fail() {
+                                //notify operation fail,...
+                                Model.instance.editCompany(company);
+                                listener.onAction(CATALOG_COMPANY_EDIT,null);
+                            }
+                        });
+                    }else {
+                        company.companyLogo = "";
+                        Model.instance.editCompany(company);
+                        progressBar.setVisibility(GONE);
+                        listener.onAction(ARTICLE_EDIT, null);
+                    }
+
                 }
                 else{
                     Log.d("TAG","CompanyEditFragment did not save edited article");
@@ -112,14 +168,19 @@ public class CompanyEditFragment extends Fragment {
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(Model.instance.removeComoany(company.id) == true){
-                    Log.d("TAG","CompanyEditFragment Delete article");
-                    listener.onAction(CATALOG_COMPANY_EDIT,null);
-                }
-                else{
-                    Log.d("TAG","CompanyEditFragment Delete article did not succed");
-                    listener.onAction(CATALOG_COMPANY_EDIT,null);
-                }
+                Model.instance.removeCompany(company);
+                listener.onAction(CATALOG_COMPANY_EDIT,null);
+            }
+        });
+
+        imageUrl = (ImageView) containerView.findViewById(R.id.edit_company_image);
+        imageUrl.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+            //TODO:go to galary/camera
+            //dispatchTakePictureIntent();
+            progressBar.setVisibility(View.VISIBLE);
+            listener.onAction(CATALOG_ADD_PICTURE,null);
             }
         });
 
@@ -133,18 +194,19 @@ public class CompanyEditFragment extends Fragment {
         if (context instanceof FragmentsDelegate) {
             listener = (FragmentsDelegate) context;
         } else {
-            throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
+            throw new RuntimeException(context.toString()
+                    + " must implement FragmentsDelegate");
         }
     }
 
     @Override
     public void onAttach(Activity context) {
         super.onAttach(context);
-
         if (context instanceof FragmentsDelegate) {
             listener = (FragmentsDelegate) context;
         } else {
-            throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
+            throw new RuntimeException(context.toString()
+                    + " must implement FragmentsDelegate");
         }
     }
 
@@ -163,4 +225,10 @@ public class CompanyEditFragment extends Fragment {
             return 1;
     }
 
+    @Override
+    public void getPicture(Bitmap bitmap) {
+        progressBar.setVisibility(GONE);
+        imageBitmap = bitmap;
+        imageUrl.setImageBitmap(bitmap);
+    }
 }

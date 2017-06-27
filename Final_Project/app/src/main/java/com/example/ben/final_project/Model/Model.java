@@ -3,6 +3,8 @@ package com.example.ben.final_project.Model;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 import android.webkit.URLUtil;
 
@@ -13,7 +15,7 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.List;
 import java.util.Random;
 
-import static com.example.ben.final_project.Model.ModelFiles.saveImageToFile;
+import static com.example.ben.final_project.Model.ModelLocalFiles.saveImageToFile;
 
 /**
  * Created by Ben on 16/06/2017.
@@ -29,6 +31,9 @@ public class Model {
     private UserModel userModel;
     private ModelSQL modelSql;
     private ModelArticleAndCommentFirebase modelArticleAndCommentFirebase;
+    private ModelCompanyAndCarFirebase modelCompanyAndCarFirebase;
+    private ModelFirebaseFiles modelFirebaseFiles;
+    private ModelLocalFiles modelLocalFiles;
 
     private Model(){
         //articleModel = new ArticleModel();
@@ -37,8 +42,13 @@ public class Model {
 
         modelSql = new ModelSQL(MyApplication.getContext());
         modelArticleAndCommentFirebase = new ModelArticleAndCommentFirebase();
+        modelCompanyAndCarFirebase = new ModelCompanyAndCarFirebase();
+        modelFirebaseFiles = new ModelFirebaseFiles();
+        modelLocalFiles = new ModelLocalFiles();
         synchArticlesDbAndregisterArticlesUpdates();
         synchArticlesCommentsDbAndregisterArticlesCommentsUpdates();
+        synchCompaniesDbAndregisterArticlesUpdates();
+        synchCompaniesCarsDbAndregisterArticlesCommentsUpdates();
     }
 
     public interface GetArticleCommentsCallback {
@@ -47,17 +57,23 @@ public class Model {
     }
 
     public void getArticleComments(String articleId,final GetArticleCommentsCallback callback) {
-        modelArticleAndCommentFirebase.getAllArticleCommentsAndObserve(articleId, new ModelArticleAndCommentFirebase.GetAllArticleCommentsAndObserveCallback() {
-            @Override
-            public void onComplete(List<Comment> list) {
-                callback.onComplete(list);
-            }
+        if(isNetworkAvailable()) {
+            modelArticleAndCommentFirebase.getAllArticleCommentsAndObserve(articleId, new ModelArticleAndCommentFirebase.GetAllArticleCommentsAndObserveCallback() {
+                @Override
+                public void onComplete(List<Comment> list) {
+                    callback.onComplete(list);
+                }
 
-            @Override
-            public void onCancel() {
-                callback.onCancel();
-            }
-        });
+                @Override
+                public void onCancel() {
+                    callback.onCancel();
+                }
+            });
+        }
+        else{
+            List<Comment> list = CommentSQL.getArticleComments(modelSql.getReadableDatabase(),articleId);
+            callback.onComplete(list);
+        }
     }
 
     public interface GetAllArticlesAndObserveCallback {
@@ -129,6 +145,7 @@ public class Model {
         });
     }
 
+
     public class UpdateArticleEvent {
         public final Article article;
         public UpdateArticleEvent(Article article) {
@@ -151,7 +168,7 @@ public class Model {
     public void addNewCommentToArticle(String articleId,Comment comment){
         Log.d("TAG","addNewCommentToArticle model");
         //CommentSQL.addComment(modelSql.getWritableDatabase(),comment);
-        modelArticleAndCommentFirebase.addComment(modelSql.getWritableDatabase(),comment);
+        modelArticleAndCommentFirebase.addComment(comment);
     }
 
     public void removeArticle(Article article){
@@ -164,19 +181,25 @@ public class Model {
         void onCancel();
     }
 
-    public void getArticle(String articleId,final GetArticleCallback callback) {
+    public void getArticle(final String articleId, final GetArticleCallback callback) {
         //return ArticleSQL.getArticle(modelSql.getReadableDatabase(),articleID);
-        modelArticleAndCommentFirebase.getArticle(articleId, new ModelArticleAndCommentFirebase.GetArticleCallback() {
-            @Override
-            public void onComplete(Article article) {
-                callback.onComplete(article);
-            }
+        if(isNetworkAvailable()) {
+            modelArticleAndCommentFirebase.getArticle(articleId, new ModelArticleAndCommentFirebase.GetArticleCallback() {
+                @Override
+                public void onComplete(Article article) {
+                    callback.onComplete(article);
+                }
 
-            @Override
-            public void onCancel() {
-                callback.onCancel();
-            }
-        });
+                @Override
+                public void onCancel() {
+                    callback.onCancel();
+                }
+            });
+        }
+        else {
+            Article article = ArticleSQL.getArticle(modelSql.getReadableDatabase(), articleId);
+            callback.onComplete(article);
+        }
     }
 
     public void editArticle(Article editedArticle) {
@@ -200,129 +223,211 @@ public class Model {
 
 
 
-
-    //////////////////////////////////////////////////////////////////
-    public interface SaveImageListener {
-        void complete(String url);
-        void fail();
-    }
-
-    public void saveImage(final Bitmap imageBmp, final String name, final SaveImageListener listener) {
-        modelArticleAndCommentFirebase.saveImage(imageBmp, name, new SaveImageListener() {
-            @Override
-            public void complete(String url) {
-                String fileName = URLUtil.guessFileName(url, null, null);
-                saveImageToFile(imageBmp,fileName);
-                listener.complete(url);
-            }
-
-            @Override
-            public void fail() {
-                listener.fail();
-            }
-        });
-
-
-    }
-
-
-    public interface GetImageListener{
-        void onSuccess(Bitmap image);
-        void onFail();
-    }
-    public void getImage(final String url, final GetImageListener listener) {
-        //check if image exsist localy
-        final String fileName = URLUtil.guessFileName(url, null, null);
-        ModelFiles.loadImageFromFileAsynch(fileName, new ModelFiles.LoadImageFromFileAsynch() {
-            @Override
-            public void onComplete(Bitmap bitmap) {
-                if (bitmap != null){
-                    Log.d("TAG","getImage from local success " + fileName);
-                    listener.onSuccess(bitmap);
-                }else {
-                    modelArticleAndCommentFirebase.getImage(url, new GetImageListener() {
-                        @Override
-                        public void onSuccess(Bitmap image) {
-                            String fileName = URLUtil.guessFileName(url, null, null);
-                            Log.d("TAG","getImage from FB success " + fileName);
-                            saveImageToFile(image,fileName);
-                            listener.onSuccess(image);
-                        }
-
-                        @Override
-                        public void onFail() {
-                            Log.d("TAG","getImage from FB fail ");
-                            listener.onFail();
-                        }
-                    });
-
-                }
-            }
-        });
-    }
-
-
-
-
     ////////////////////////////////////////////////////////////////
 
-    public boolean editCompany(CarCompany editedCompany) {
-        return companyModel.editCompany(editedCompany);
+    public void editCompany(Company editedCompany) {
+        modelCompanyAndCarFirebase.editCompany(editedCompany);
     }
 
-    public boolean editModel(String companyId,Car car) {
-        return companyModel.editModel(companyId,car);
+    public void addNewModelToCompany(String companyId,Car car){
+        Log.d("TAG","addNewModelToCompany model");
+        modelCompanyAndCarFirebase.addCar(car);
     }
 
-    public boolean removeModel(String companyId,String carId) {
-        return companyModel.removeModel(companyId,carId);
-    }
-
-
-
-
-
-    public void addNewModel(String companyId,Car car){
-        companyModel.addNewModel(companyId,car);
-    }
-
-    public void addNewCompany(CarCompany company){
-        companyModel.addNewCompany(company);
+    public void addNewCompany(Company company){
+        modelCompanyAndCarFirebase.addCompany(company);
     }
 
 
-    public int getCompanyListSize() {
-        return companyModel.getCompanyListSize();
-    }
-
-    public int getModelsListSize(String companyId) {
-        return companyModel.getModelsListSize(companyId);
-    }
-
-    public Car getModel(String companyId,String carId) {
-        return companyModel.getModel(companyId,carId);
-    }
-
-    public boolean removeComoany(String id){
-        return companyModel.removeCompany(id);
-    }
-
-    public CarCompany getCompany(String companyID) {
-        return  companyModel.getCompany(companyID);
-    }
-
-    public List<Car> getCompanyModels(String companyID) {
-        return companyModel.getCompanyModels(companyID);
-    }
-
-    public Car getCar(String companyID,String carID) {
-        return companyModel.getCar(companyID, carID);
-    }
 
 
-    public List<CarCompany> getAllCompanies(){
-        return companyModel.getAllCompanies();
+    public interface GetCompanyModelsCallback {
+        void onComplete(List<Car> list);
+        void onCancel();
     }
+
+    public void getCompanyModels(String companyId,final GetCompanyModelsCallback callback) {
+        if(isNetworkAvailable()) {
+            modelCompanyAndCarFirebase.getAllCompanyCarsAndObserve(companyId, new ModelCompanyAndCarFirebase.GetAllCompanyCarsAndObserveCallback() {
+                @Override
+                public void onComplete(List<Car> list) {
+                    callback.onComplete(list);
+                }
+
+                @Override
+                public void onCancel() {
+                    callback.onCancel();
+                }
+            });
+        }
+        else{
+            List<Car> list = CarSQL.getCompanyModels(modelSql.getReadableDatabase(),companyId);
+            callback.onComplete(list);
+        }
+    }
+
+
+    public void removeCompany(Company company){
+        modelCompanyAndCarFirebase.removeCompany(company);
+    }
+
+
+    public interface GetCompanyCallback {
+        void onComplete(Company company);
+        void onCancel();
+    }
+
+
+    public void getCompany(final String companyID, final GetCompanyCallback callback) {
+        //return ArticleSQL.getArticle(modelSql.getReadableDatabase(),articleID);
+        if(isNetworkAvailable()) {
+            modelCompanyAndCarFirebase.getCompany(companyID, new ModelCompanyAndCarFirebase.GetCompanyCallback() {
+                @Override
+                public void onComplete(Company company) {
+                    callback.onComplete(company);
+                }
+
+                @Override
+                public void onCancel() {
+                    callback.onCancel();
+                }
+            });
+        }
+        else {
+            Company company = CompanySQL.getCompany(modelSql.getReadableDatabase(), companyID);
+            callback.onComplete(company);
+        }
+    }
+
+    public interface GetModelCallback {
+        void onComplete(Car car);
+        void onCancel();
+    }
+
+
+    public void getCar(final String companyId, final String carId, final GetModelCallback callback) {
+        //return ArticleSQL.getArticle(modelSql.getReadableDatabase(),articleID);
+        if(isNetworkAvailable()) {
+            modelCompanyAndCarFirebase.getCar(carId, new ModelCompanyAndCarFirebase.GetModelCallback() {
+                @Override
+                public void onComplete(Car car) {
+                    callback.onComplete(car);
+                }
+
+                @Override
+                public void onCancel() {
+                    callback.onCancel();
+                }
+            });
+        }
+        else {
+            Car car = CarSQL.getCar(modelSql.getReadableDatabase(), companyId,carId);
+            callback.onComplete(car);
+        }
+    }
+
+
+
+    public interface GetAllCompaniesAndObserveCallback {
+        void onComplete(List<Company> list);
+        void onCancel();
+    }
+
+    public void getAllCompanies(final GetAllCompaniesAndObserveCallback callback){
+        List<Company> data = CompanySQL.getAllCompanies(modelSql.getReadableDatabase());
+        callback.onComplete(data);
+    }
+
+    public void editCar(Car editedCar) {
+        modelCompanyAndCarFirebase.editCar(editedCar);
+    }
+
+
+    public void removeCar(Car car) {
+        modelCompanyAndCarFirebase.removeCar(car);
+    }
+
+
+    public class UpdateCompanyEvent {
+        public final Company company;
+        public UpdateCompanyEvent(Company company) {
+            this.company = company;
+        }
+    }
+
+    public class UpdateCarEvent {
+        public final Car car;
+        public UpdateCarEvent(Car car) {
+            this.car = car;
+        }
+    }
+
+
+
+    private void synchCompaniesDbAndregisterArticlesUpdates() {
+        //1. get local lastUpdateTade
+        SharedPreferences pref = MyApplication.getContext().getSharedPreferences("TAG", Context.MODE_PRIVATE);
+        final double lastUpdateDate = pref.getFloat("CompniesLastUpdateDate",0);
+        Log.d("TAG","CompniesLastUpdateDate: " + lastUpdateDate);
+
+        modelCompanyAndCarFirebase.registerCompanysUpdates(lastUpdateDate,new ModelCompanyAndCarFirebase.RegisterCompanysUpdatesCallback() {
+
+            @Override
+            public void onCarCompanyUpdate(Company company) {
+                //3. update the local db
+                if(CompanySQL.getCompany(modelSql.getReadableDatabase(),company.companyId) != null)
+                    CompanySQL.editCompany(modelSql.getWritableDatabase(),company);
+                else
+                    CompanySQL.addNewCompany(modelSql.getWritableDatabase(),company);
+                //4. update the lastUpdateTade
+                SharedPreferences pref = MyApplication.getContext().getSharedPreferences("TAG", Context.MODE_PRIVATE);
+                final double lastUpdateDate = pref.getFloat("CompniesLastUpdateDate",0);
+                if (lastUpdateDate < company.lastUpdatedDate){
+                    SharedPreferences.Editor prefEd = MyApplication.getContext().getSharedPreferences("TAG",
+                            Context.MODE_PRIVATE).edit();
+                    prefEd.putFloat("CompniesLastUpdateDate", (float) company.lastUpdatedDate);
+                    prefEd.commit();
+                    Log.d("TAG","CompniesLastUpdateDate: " + company.lastUpdatedDate);
+                }
+
+                EventBus.getDefault().post(new UpdateCompanyEvent(company));
+            }
+        });
+    }
+
+
+    private void synchCompaniesCarsDbAndregisterArticlesCommentsUpdates() {
+        //1. get local lastUpdateTade
+        SharedPreferences pref = MyApplication.getContext().getSharedPreferences("TAG", Context.MODE_PRIVATE);
+        final double lastUpdateDate = pref.getFloat("CompaniesCarsLastUpdateDate",0);
+        Log.d("TAG","CompaniesCarsLastUpdateDate: " + lastUpdateDate);
+
+        modelCompanyAndCarFirebase.registerCarsUpdates(lastUpdateDate,new ModelCompanyAndCarFirebase.RegisterCarsUpdatesCallback() {
+            @Override
+            public void onCarUpdate(Car car) {
+                //3. update the local db
+                if(CarSQL.getCar(modelSql.getReadableDatabase(),car.companyID,car.carID) != null)
+                    CarSQL.editCar(modelSql.getWritableDatabase(),car);
+                else
+                    CarSQL.addCar(modelSql.getWritableDatabase(),car);
+                //4. update the lastUpdateTade
+                SharedPreferences pref = MyApplication.getContext().getSharedPreferences("TAG", Context.MODE_PRIVATE);
+                final double lastUpdateDate = pref.getFloat("CompaniesCarsLastUpdateDate",0);
+                if (lastUpdateDate < car.lastUpdatedDate){
+                    SharedPreferences.Editor prefEd = MyApplication.getContext().getSharedPreferences("TAG",
+                            Context.MODE_PRIVATE).edit();
+                    prefEd.putFloat("CompaniesCarsLastUpdateDate", (float) car.lastUpdatedDate);
+                    prefEd.commit();
+                    Log.d("TAG","CompaniesCarsLastUpdateDate: " + car.lastUpdatedDate);
+                }
+
+                EventBus.getDefault().post(new UpdateCarEvent(car));
+            }
+        });
+    }
+
+
+    /////////////////////////////////////////////////////////////////////////////////
 
     public User getUser(String username){
         return userModel.getUser(username);
@@ -344,6 +449,10 @@ public class Model {
         return false;
     }
 
+
+
+
+    //////////////////////////////////////////////////////////////////////////////
     public static String random() {
         Random generator = new Random();
         String template = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -355,6 +464,91 @@ public class Model {
         }
         Log.d("TAG","random articleID = " + randomStringBuilder.toString());
         return randomStringBuilder.toString();
+    }
+
+
+    public boolean isNetworkAvailable() {
+        boolean haveConnectedWifi = false;
+        boolean haveConnectedMobile = false;
+
+        ConnectivityManager cm = (ConnectivityManager) MyApplication.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+        for (NetworkInfo ni : netInfo) {
+            if (ni.getTypeName().equalsIgnoreCase("WIFI"))
+                if (ni.isConnected())
+                    haveConnectedWifi = true;
+            if (ni.getTypeName().equalsIgnoreCase("MOBILE"))
+                if (ni.isConnected())
+                    haveConnectedMobile = true;
+        }
+
+        Log.d("TAG","connected = " + (haveConnectedWifi || haveConnectedMobile));
+
+        return haveConnectedWifi || haveConnectedMobile;
+    }
+
+
+
+    //////////////////////////////////////////////////////////////////
+    public interface SaveImageListener {
+        void complete(String url);
+        void fail();
+    }
+
+    public void saveImage(final Bitmap imageBmp, final String name, final SaveImageListener listener) {
+        //modelArticleAndCommentFirebase.saveImage(imageBmp, name, new SaveImageListener() {
+        modelFirebaseFiles.saveImage(imageBmp, name, new SaveImageListener() {
+            @Override
+            public void complete(String url) {
+                String fileName = URLUtil.guessFileName(url, null, null);
+                Log.d("TAG","guessed Filename = " + fileName);
+                saveImageToFile(imageBmp,fileName);
+                listener.complete(url);
+            }
+
+            @Override
+            public void fail() {
+                listener.fail();
+            }
+        });
+
+
+    }
+
+
+    public interface GetImageListener{
+        void onSuccess(Bitmap image);
+        void onFail();
+    }
+    public void getImage(final String url, final GetImageListener listener) {
+        //check if image exsist localy
+        final String fileName = URLUtil.guessFileName(url, null, null);
+        ModelLocalFiles.loadImageFromFileAsynch(fileName, new ModelLocalFiles.LoadImageFromFileAsynch() {
+            @Override
+            public void onComplete(Bitmap bitmap) {
+                if (bitmap != null){
+                    Log.d("TAG","getImage from local success " + fileName);
+                    listener.onSuccess(bitmap);
+                }else {
+                    modelFirebaseFiles.getImage(url, new GetImageListener() {
+                        @Override
+                        public void onSuccess(Bitmap image) {
+                            String fileName = URLUtil.guessFileName(url, null, null);
+                            Log.d("TAG","getImage from FB success " + fileName);
+                            saveImageToFile(image,fileName);
+                            listener.onSuccess(image);
+                        }
+
+                        @Override
+                        public void onFail() {
+                            Log.d("TAG","getImage from FB fail ");
+                            listener.onFail();
+                        }
+                    });
+
+                }
+            }
+        });
     }
 
 }

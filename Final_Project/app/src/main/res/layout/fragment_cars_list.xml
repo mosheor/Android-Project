@@ -11,13 +11,25 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_margin="10dp">
-        <ImageView
-            android:id="@+id/car_list_company_image"
+
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_weight="2"
-            android:layout_height="60dp"
-            android:src="@drawable/bugatti"
-            android:layout_gravity="left"/>
+            android:layout_height="wrap_content"
+            android:layout_weight="2">
+            <ImageView
+                android:id="@+id/car_list_company_image"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_gravity="left"
+                android:scaleType="fitCenter"/>
+            <ProgressBar
+                android:id="@+id/car_list_progressBar"
+                android:layout_gravity="center_horizontal|center_vertical"
+                android:layout_width="50dp"
+                android:visibility="gone"
+                android:layout_height="50dp" />
+        </FrameLayout>
+
         <TextView
             android:id="@+id/car_list_company_name"
             android:layout_weight="1"

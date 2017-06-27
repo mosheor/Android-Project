@@ -12,7 +12,7 @@ import com.example.ben.final_project.R;
 public class Car {
     public String carID;
     public String companyID;
-    public String modelName;
+    public String carName;
     public String companyName;
     public String carPicture;
     public String description;
@@ -22,6 +22,8 @@ public class Car {
     public int pollution;//TODO:in add new company to do in this text 1 from 15 - scala
     public float price;
     public int warranty;
-    public float zeroToHundrend;
+    public float zeroToHundred;
     public float fuelConsumption;
+    public double lastUpdatedDate;
+    public boolean wasDeleted;
 }

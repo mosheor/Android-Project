@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,6 +21,8 @@ import com.example.ben.final_project.Fragments.CompanyDetailsFragment;
 import com.example.ben.final_project.Fragments.CompanyListFragment;
 import com.example.ben.final_project.Fragments.CarEditFragment;
 import com.example.ben.final_project.Fragments.CompanyEditFragment;
+import com.example.ben.final_project.Model.Car;
+import com.example.ben.final_project.Model.Company;
 import com.example.ben.final_project.Model.Model;
 import com.example.ben.final_project.R;
 
@@ -33,7 +37,9 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
     public static final int CATALOG_CAR_ADD = 5;
     public static final int CATALOG_CAR_EDIT = 6;
     public static final int CATALOG_CAR_DETAILS = 7;
+    public static final int CATALOG_ADD_PICTURE= 8;
 
+    private GetPicture imageDelegate;
     CompanyListFragment companyListFragment;
     String companyClickedID;
     String carClickedID;;
@@ -50,8 +56,7 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
         Log.d("TAG","CarCatalogActivity onCreate");
         setContentView(R.layout.activity_car_catalog);
 
-        companyListFragment = new CompanyListFragment();
-        openFragment(companyListFragment);
+        openCompanyListFragment();
         getActionBar().setDisplayHomeAsUpEnabled(false);
     }
 
@@ -100,38 +105,44 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
                 finish();
                 break;
             case R.id.menu_add_icon:
-                if(companyClickedID == null) {//add company
-                    int companyListSize = Model.instance.getCompanyListSize();
-                    CompanyAddFragment addCompanyFragment = CompanyAddFragment.newInstance(String.valueOf(companyListSize));
-                    openFragment(addCompanyFragment);
-                    item.setVisible(false);
-                    currentFragment = CATALOG_COMPANY_ADD;
+                if(Model.instance.isNetworkAvailable()) {
+                    if (companyClickedID == null) {//add company
+                        CompanyAddFragment addCompanyFragment = CompanyAddFragment.newInstance("0");
+                        imageDelegate = addCompanyFragment;
+                        openFragment(addCompanyFragment);
+                        item.setVisible(false);
+                        currentFragment = CATALOG_COMPANY_ADD;
+                    } else {
+                        CarAddFragment addCarFragment = CarAddFragment.newInstance(companyClickedID, "0");
+                        openFragment(addCarFragment);
+                        item.setVisible(false);
+                        currentFragment = CATALOG_CAR_ADD;
+                    }
                 }
-                else{
-                    int modelsListSize = Model.instance.getModelsListSize(companyClickedID);
-                    CarAddFragment addCarFragment = CarAddFragment.newInstance(companyClickedID,String.valueOf(modelsListSize));
-                    openFragment(addCarFragment);
-                    item.setVisible(false);
-                    currentFragment = CATALOG_CAR_ADD;
-                }
+                else
+                    Toast.makeText(this, "there is not connection", Toast.LENGTH_SHORT).show();
                 commitIntent = false;
                 break;
             case R.id.menu_edit_icon:
                 Log.d("TAG","CarCatalogActivity menu_edit_icon");
-                if(companyClickedID != null && carClickedID == null) {//edit company
-                    Log.d("TAG","CarCatalogActivity edit articleID " + companyClickedID);
-                    CompanyEditFragment editCompanyFragment = CompanyEditFragment.newInstance(String.valueOf(companyClickedID));//todo in line
-                    openFragment(editCompanyFragment);
-                    item.setVisible(false);
-                    currentFragment = CATALOG_COMPANY_ADD;
+                if(Model.instance.isNetworkAvailable()) {
+                    if (companyClickedID != null && carClickedID == null) {//edit company
+                        Log.d("TAG", "CarCatalogActivity edit articleID " + companyClickedID);
+                        CompanyEditFragment editCompanyFragment = CompanyEditFragment.newInstance(String.valueOf(companyClickedID));//todo in line
+                        imageDelegate = editCompanyFragment;
+                        openFragment(editCompanyFragment);
+                        item.setVisible(false);
+                        currentFragment = CATALOG_COMPANY_ADD;
+                    } else if (companyClickedID != null && carClickedID != null) {//edit car
+                        Log.d("TAG", "CarCatalogActivity edit articleID " + carClickedID + " in company articleID " + companyClickedID);
+                        CarEditFragment editCarFragment = CarEditFragment.newInstance(String.valueOf(companyClickedID), String.valueOf(carClickedID));
+                        openFragment(editCarFragment);
+                        item.setVisible(false);
+                        currentFragment = CATALOG_CAR_EDIT;
+                    }
                 }
-                else if(companyClickedID != null && carClickedID != null){//edit car
-                    Log.d("TAG","CarCatalogActivity edit articleID " + carClickedID + " in company articleID " + companyClickedID);
-                    CarEditFragment editCarFragment = CarEditFragment.newInstance(String.valueOf(companyClickedID),String.valueOf(carClickedID));
-                    openFragment(editCarFragment);
-                    item.setVisible(false);
-                    currentFragment = CATALOG_CAR_EDIT;
-                }
+                else
+                    Toast.makeText(this, "there is not connection", Toast.LENGTH_SHORT).show();
                 commitIntent = false;
                 break;
             default:
@@ -141,6 +152,21 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
         if (commitIntent)
             commitIntentToActivityAndFinish(intentClass);
         return true;
+    }
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(takePictureIntent, CATALOG_ADD_PICTURE);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == CATALOG_ADD_PICTURE && resultCode == RESULT_OK) {
+            Bundle extras = data.getExtras();
+            imageDelegate.getPicture((Bitmap) extras.get("data"));
+        }
     }
 
     private void commitIntentToActivityAndFinish(Class to)
@@ -157,68 +183,122 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
         tran.commit();
     }
 
+    private void openCompanyListFragment(){
+        currentFragment = CATALOG_COMPANY_LIST;
+        companyListFragment = new CompanyListFragment();
+        FragmentTransaction tran = getFragmentManager().beginTransaction();
+        tran.replace(R.id.car_catalog_frame_fragment, companyListFragment);
+        tran.commit();
+    }
+
     @Override
     public void onAction(int command,String id) {
         switch (command){
             case CATALOG_CAR_ADD:
                 companyListFragment = new CompanyListFragment();
-                openFragment(companyListFragment);
+                openCompanyListFragment();
                 addItem.setVisible(true);
                 editItem.setVisible(false);
                 companyClickedID = null;
                 carClickedID = null;
-                currentFragment = CATALOG_COMPANY_LIST;
-                break;
-            case CATALOG_CAR_DETAILS:
-                carClickedID = Model.instance.getCar(companyClickedID,id).carID;
-                CarDetailsFragment carDetailsFragment = CarDetailsFragment.newInstance(companyClickedID,carClickedID);// todo carDetailsFragment OR CarDetailsFragment ???
-                openFragment(carDetailsFragment);
-                addItem.setVisible(false);
-                editItem.setVisible(true);
-                currentFragment = CATALOG_CAR_DETAILS;
-                break;
-            case CATALOG_CAR_EDIT:
-                companyListFragment = new CompanyListFragment();
-                openFragment(companyListFragment);
-                addItem.setVisible(true);
-                editItem.setVisible(false);
-                companyClickedID = null;
-                carClickedID = null;
-                currentFragment = CATALOG_COMPANY_LIST;
-                break;
-            case CATALOG_CAR_LIST:
-                companyClickedID = Model.instance.getCompany(id).id;
-                CarListFragment carListFragment = CarListFragment.newInstance(companyClickedID);
-                openFragment(carListFragment);
-                addItem.setVisible(true);
-                editItem.setVisible(false);
                 currentFragment = CATALOG_CAR_LIST;
                 break;
+            case CATALOG_CAR_DETAILS:
+                Model.instance.getCar(companyClickedID, id, new Model.GetModelCallback() {
+                    @Override
+                    public void onComplete(Car car) {
+                        carClickedID = car.carID;
+                        CarDetailsFragment carDetailsFragment = CarDetailsFragment.newInstance(companyClickedID,carClickedID);// todo carDetailsFragment OR CarDetailsFragment ???
+                        openFragment(carDetailsFragment);
+                        addItem.setVisible(false);
+                        editItem.setVisible(true);
+                        currentFragment = CATALOG_CAR_DETAILS;
+                    }
+
+                    @Override
+                    public void onCancel() {
+
+                    }
+                });
+
+                break;
+            case CATALOG_CAR_EDIT:
+                if(Model.instance.isNetworkAvailable()) {
+                    companyListFragment = new CompanyListFragment();
+                    openCompanyListFragment();
+                    addItem.setVisible(true);
+                    editItem.setVisible(false);
+                    companyClickedID = null;
+                    carClickedID = null;
+                    currentFragment = CATALOG_CAR_LIST;
+                }
+                else
+                    Toast.makeText(this, "there is not connection", Toast.LENGTH_SHORT).show();
+                break;
+            case CATALOG_CAR_LIST:
+                Model.instance.getCompany(id, new Model.GetCompanyCallback() {
+                    @Override
+                    public void onComplete(Company company) {
+                        companyClickedID = company.companyId;
+                        CarListFragment carListFragment = CarListFragment.newInstance(companyClickedID);
+                        openFragment(carListFragment);
+                        addItem.setVisible(true);
+                        editItem.setVisible(false);
+                        currentFragment = CATALOG_CAR_LIST;
+                    }
+
+                    @Override
+                    public void onCancel() {
+
+                    }
+                });
+                break;
             case CATALOG_COMPANY_ADD:
-                companyListFragment = new CompanyListFragment();
-                openFragment(companyListFragment);
-                addItem.setVisible(true);
-                editItem.setVisible(false);
-                companyClickedID = null;
-                currentFragment = CATALOG_COMPANY_LIST;
+                if(Model.instance.isNetworkAvailable()) {
+                    companyListFragment = new CompanyListFragment();
+                    openCompanyListFragment();
+                    addItem.setVisible(true);
+                    editItem.setVisible(false);
+                    companyClickedID = null;
+                    currentFragment = CATALOG_COMPANY_LIST;
+                }
+                else
+                    Toast.makeText(this, "there is not connection", Toast.LENGTH_SHORT).show();
                 break;
             case CATALOG_COMPANY_DETAILS:
-                companyClickedID = Model.instance.getCompany(id).id;
-                CompanyDetailsFragment companyDetailsFragment = CompanyDetailsFragment.newInstance(companyClickedID);
-                openFragment(companyDetailsFragment);
-                addItem.setVisible(false);
-                editItem.setVisible(true);
-                currentFragment = CATALOG_COMPANY_DETAILS;
+                 Model.instance.getCompany(id, new Model.GetCompanyCallback() {
+                    @Override
+                    public void onComplete(Company company) {
+                        companyClickedID = company.companyId;
+                        CompanyDetailsFragment companyDetailsFragment = CompanyDetailsFragment.newInstance(companyClickedID);
+                        openFragment(companyDetailsFragment);
+                        addItem.setVisible(false);
+                        editItem.setVisible(true);
+                        currentFragment = CATALOG_COMPANY_DETAILS;
+                    }
+
+                    @Override
+                    public void onCancel() {
+
+                    }
+                });
                 break;
             case CATALOG_COMPANY_EDIT:
-                companyListFragment = new CompanyListFragment();
-                openFragment(companyListFragment);
-                addItem.setVisible(true);
-                editItem.setVisible(false);
-                currentFragment = CATALOG_COMPANY_LIST;
-                companyClickedID = null;
+                if(Model.instance.isNetworkAvailable()) {
+                    companyListFragment = new CompanyListFragment();
+                    openCompanyListFragment();
+                    addItem.setVisible(true);
+                    editItem.setVisible(false);
+                    currentFragment = CATALOG_COMPANY_LIST;
+                    companyClickedID = null;
+                }
+                else
+                    Toast.makeText(this, "there is not connection", Toast.LENGTH_SHORT).show();
                 break;
             case CATALOG_COMPANY_LIST:
+                break;
+            case CATALOG_ADD_PICTURE:
+                dispatchTakePictureIntent();
                 break;
         }
     }
@@ -263,6 +343,8 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
                 currentFragment = CATALOG_COMPANY_DETAILS;
                 break;
             case CATALOG_COMPANY_LIST:
+
+                finish();
                 break;
         }
     }

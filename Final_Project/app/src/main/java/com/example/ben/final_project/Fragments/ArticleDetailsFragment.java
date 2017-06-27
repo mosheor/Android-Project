@@ -2,6 +2,7 @@ package com.example.ben.final_project.Fragments;
 
 
 import android.app.Fragment;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,6 +13,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +30,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+
+import static android.view.View.GONE;
 
 public class ArticleDetailsFragment extends Fragment {
 
@@ -80,13 +84,21 @@ public class ArticleDetailsFragment extends Fragment {
 
         ImageButton addCommentButton = (ImageButton) containerView.findViewById(R.id.article_detailes_add_button);
 
-        final ImageView image = (ImageView) containerView.findViewById(R.id.article_detailes_image);
+        final ImageView image = (ImageView) containerView.findViewById(R.id.article_details_image);
         final TextView mainTitle = (TextView) containerView.findViewById(R.id.article_detailes_main_title);
-        final TextView subTitle = (TextView) containerView.findViewById(R.id.article_detailes_sub_title);
+        final TextView subTitle = (TextView) containerView.findViewById(R.id.article_details_sub_title);
         final TextView author = (TextView) containerView.findViewById(R.id.article_detailes_author);
         final TextView publishedDate = (TextView) containerView.findViewById(R.id.article_detailes_published_date);
         final TextView content = (TextView) containerView.findViewById(R.id.article_detailes_content_article);
         final TextView newComment = (TextView) containerView.findViewById(R.id.article_detailes_new_comment);
+        final ProgressBar progressBar = (ProgressBar) containerView.findViewById(R.id.article_details_progressBar);
+        progressBar.setVisibility(GONE);
+
+        adapter = new CommentsListAdapter();
+        adapter.setInflater(inflater);
+        commentsList = (ListView) containerView.findViewById(R.id.article_detailes_comments);
+        commentsList.setAdapter(adapter);
+        setListViewHeightBasedOnChildren(commentsList);
 
         Model.instance.getArticle(articleId, new Model.GetArticleCallback() {
             @Override
@@ -103,6 +115,21 @@ public class ArticleDetailsFragment extends Fragment {
                 publishedDate.setText(sfd.format(new Date((long)article.publishDate + 3600000 * 7)));
                 content.setText(articleData.content);
                 articleData.comments = new LinkedList<Comment>();
+
+                progressBar.setVisibility(View.VISIBLE);
+                Model.instance.getImage(article.imageUrl, new Model.GetImageListener() {
+                    @Override
+                    public void onSuccess(Bitmap imageLoad) {
+                        image.setImageBitmap(imageLoad);
+                        progressBar.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onFail() {
+
+                    }
+                });
+
                 Model.instance.getArticleComments(articleId, new Model.GetArticleCommentsCallback() {
                     @Override
                     public void onComplete(List<Comment> list) {
@@ -124,38 +151,35 @@ public class ArticleDetailsFragment extends Fragment {
             }
         });
 
-        adapter = new CommentsListAdapter();
-        adapter.setInflater(inflater);
-        commentsList = (ListView) containerView.findViewById(R.id.article_detailes_comments);
-        commentsList.setAdapter(adapter);
-
-        setListViewHeightBasedOnChildren(commentsList);
-
         addCommentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("TAG", "ArticleDetailsFragment add comment click");
+                if (Model.instance.isNetworkAvailable()) {
+                    Log.d("TAG", "ArticleDetailsFragment add comment click");
 
-                int ok = 0;
-                boolean save = true;
+                    int ok = 0;
+                    boolean save = true;
 
-                if(newComment.getText().toString().equals(""))
-                    newComment.setError("You need write text");
-                else{
-                    Comment comment = new Comment();
-                    comment.commentContent = newComment.getText().toString();
-                    comment.author = "bobo on fire";//TODO:current author from loged in user
-                    comment.articleID = articleId;//TODo:change random
+                    if (newComment.getText().toString().equals(""))
+                        newComment.setError("You need write text");
+                    else {
+                        Comment comment = new Comment();
+                        comment.commentContent = newComment.getText().toString();
+                        comment.author = "bobo on fire";//TODO:current author from loged in user
+                        comment.articleID = articleId;//TODo:change random
 
-                    comment.commentID = ""+articleData.comments.size() + "-" + articleId;
-                    newComment.setText("");
+                        comment.commentID = Model.random();
+                        newComment.setText("");
 
-                    Model.instance.addNewCommentToArticle(articleId,comment);
+                        Model.instance.addNewCommentToArticle(articleId, comment);
 
-                    //articleData = Model.instance.getArticle(articleID);
-                    //notifyAdapter();
-                    setListViewHeightBasedOnChildren(commentsList);
+                        //articleData = Model.instance.getArticle(articleID);
+                        //notifyAdapter();
+                        setListViewHeightBasedOnChildren(commentsList);
+                    }
                 }
+                else
+                    Toast.makeText(getActivity(), "There is no connection", Toast.LENGTH_SHORT).show();
             }
         });
 

@@ -4,6 +4,7 @@ package com.example.ben.final_project.Fragments;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,8 +12,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.example.ben.final_project.Activities.FragmentsDelegate;
+import com.example.ben.final_project.Activities.GetPicture;
 import com.example.ben.final_project.Model.Article;
 import com.example.ben.final_project.Model.Model;
 import com.example.ben.final_project.R;
@@ -20,14 +25,20 @@ import com.example.ben.final_project.R;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static android.view.View.GONE;
+import static com.example.ben.final_project.Activities.ArticlesActivity.ARTICLE_ADD;
 import static com.example.ben.final_project.Activities.ArticlesActivity.ARTICLE_EDIT;
+import static com.example.ben.final_project.Activities.ArticlesActivity.ADD_PICTURE;
 
 
-public class ArticleEditFragment extends Fragment {
+public class ArticleEditFragment extends Fragment implements GetPicture {
     private static final String ARG_PARAM1 = "param1";//article articleID
     private String mParam1;
     Article article;
     private FragmentsDelegate listener;
+    ImageView imageUrl;
+    ProgressBar progressBar;
+    Bitmap imageBitmap;
 
     public static ArticleEditFragment newInstance(String param1) {
         ArticleEditFragment fragment = new ArticleEditFragment();
@@ -62,8 +73,10 @@ public class ArticleEditFragment extends Fragment {
         final EditText author = (EditText) containerView.findViewById(R.id.edit_article_author);
         final EditText content = (EditText) containerView.findViewById(R.id.edit_article_content);
         final EditText date = (EditText) containerView.findViewById(R.id.edit_article_date);
-        final EditText imageUrl = (EditText) containerView.findViewById(R.id.edit_article_image);
         final EditText subTitle = (EditText) containerView.findViewById(R.id.edit_article_sub_title);
+        imageUrl = (ImageView) containerView.findViewById(R.id.edit_article_image);
+        progressBar = (ProgressBar) containerView.findViewById(R.id.edit_article_progressBar);
+        progressBar.setVisibility(GONE);
 
         article = new Article();
         Model.instance.getArticle(mParam1, new Model.GetArticleCallback() {
@@ -73,15 +86,27 @@ public class ArticleEditFragment extends Fragment {
                 mainTitle.setText(article.mainTitle);
                 author.setText(article.author);
                 content.setText(article.content);
-
+                subTitle.setText(article.subTitle);
                 SimpleDateFormat sfd = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
                 Log.d("TAG","article date = " + sfd.format(new Date((long)article.publishDate + 3600000 * 7)));
 
                 date.setText(sfd.format(new Date((long)article.publishDate + 3600000 * 7)));
                 date.setEnabled(false);
-                date.setEnabled(false);
-                imageUrl.setText(article.imageUrl);
-                subTitle.setText(article.subTitle);
+                progressBar.setVisibility(View.VISIBLE);
+                Model.instance.getImage(article.imageUrl, new Model.GetImageListener() {
+                    @Override
+                    public void onSuccess(Bitmap image) {
+                        imageUrl.setImageBitmap(image);
+                        progressBar.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onFail() {
+
+                    }
+                });
+
+
             }
 
             @Override
@@ -93,45 +118,78 @@ public class ArticleEditFragment extends Fragment {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("TAG","ArticleAddFragment Btn Save click");
+                if (Model.instance.isNetworkAvailable()) {
+                    Log.d("TAG", "ArticleAddFragment Btn Save click");
 
-                int ok = 0;
-                boolean save = true;
+                    int ok = 0;
+                    boolean save = true;
 
-                ok += valied(mainTitle,"Main title is required!");//TODO:write errors in hebrew
-                ok += valied(author,"Author name is required!");
-                ok += valied(content,"Content is required!");
-                ok += valied(date,"Date is required!");
-                ok += valied(imageUrl,"Image is required!");
-                ok += valied(subTitle,"Sub title is required!");
+                    ok += valied(mainTitle, "Main title is required!");//TODO:write errors in hebrew
+                    ok += valied(author, "Author name is required!");
+                    ok += valied(content, "Content is required!");
+                    ok += valied(date, "Date is required!");
+                    ok += valied(subTitle, "Sub title is required!");
 
-                if(ok != 6)
-                    save = false;
-                else{
-                    if(author.getText().toString().compareTo(article.author) == 0)
-                        if(mainTitle.getText().toString().compareTo(article.mainTitle) == 0)
-                            if(subTitle.getText().toString().compareTo(article.subTitle) == 0)
-                                if(imageUrl.getText().toString().compareTo(article.imageUrl) == 0)
-                                    if(content.getText().toString().compareTo(article.content) == 0)
+                    if (ok != 5)
+                        save = false;
+                    else {
+                        if (author.getText().toString().compareTo(article.author) == 0)
+                            if (mainTitle.getText().toString().compareTo(article.mainTitle) == 0)
+                                if (subTitle.getText().toString().compareTo(article.subTitle) == 0)
+                                    if (content.getText().toString().compareTo(article.content) == 0)
+                                        if(imageBitmap != null)
                                             save = false;
 
                     }
 
-                if(save == true) {
-                    article.author = author.getText().toString();
-                    article.mainTitle = mainTitle.getText().toString();
-                    article.subTitle = subTitle.getText().toString();
-                    article.imageUrl = imageUrl.getText().toString();
-                    article.content = content.getText().toString();
+                    if (save == true) {
+                        article.author = author.getText().toString();
+                        article.mainTitle = mainTitle.getText().toString();
+                        article.subTitle = subTitle.getText().toString();
+                        article.content = content.getText().toString();
 
-                    Model.instance.editArticle(article);
-                    listener.onAction(ARTICLE_EDIT,null);
-                }
-                else{
-                    Log.d("TAG","ArticleAddFragment did not save edited article");
-                    listener.onAction(ARTICLE_EDIT,null);
-                }
+                        if (imageBitmap != null) {
+                            Model.instance.saveImage(imageBitmap, Model.random() + ".jpeg", new Model.SaveImageListener() {
+                                @Override
+                                public void complete(String url) {
+                                    article.imageUrl = url;
+                                    Model.instance.editArticle(article);
+                                    progressBar.setVisibility(GONE);
+                                    listener.onAction(ARTICLE_EDIT, null);
+                                }
 
+                                @Override
+                                public void fail() {
+                                    //notify operation fail,...
+                                    progressBar.setVisibility(GONE);
+                                    listener.onAction(ARTICLE_ADD, null);
+                                }
+                            });
+                        }else{
+                            article.imageUrl = "";
+                            Model.instance.editArticle(article);
+                            progressBar.setVisibility(GONE);
+                            listener.onAction(ARTICLE_EDIT, null);
+                        }
+                    } else {
+                        Log.d("TAG", "ArticleAddFragment did not save edited article");
+                        listener.onAction(ARTICLE_EDIT, null);
+                    }
+            }
+            else {
+                Toast.makeText(getActivity(), "There is no connection", Toast.LENGTH_SHORT);
+                listener.onAction(ARTICLE_EDIT,null);
+            }
+            }
+        });
+
+        imageUrl.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+            //TODO:go to galary/camera
+            //dispatchTakePictureIntent();
+            progressBar.setVisibility(View.VISIBLE);
+            listener.onAction(ADD_PICTURE,null);
             }
         });
 
@@ -146,8 +204,12 @@ public class ArticleEditFragment extends Fragment {
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Model.instance.removeArticle(article);
-                Log.d("TAG","ArticleAddFragment Delete article");
+                if(Model.instance.isNetworkAvailable()) {
+                    Model.instance.removeArticle(article);
+                    Log.d("TAG", "ArticleAddFragment Delete article");
+                }
+                else
+                    Toast.makeText(getActivity(), "There is no connection", Toast.LENGTH_SHORT);
                 listener.onAction(ARTICLE_EDIT,null);
             }
         });
@@ -190,5 +252,12 @@ public class ArticleEditFragment extends Fragment {
         }
         else
             return 1;
+    }
+
+    @Override
+    public void getPicture(Bitmap bitmap) {
+        progressBar.setVisibility(GONE);
+        imageBitmap = bitmap;
+        imageUrl.setImageBitmap(bitmap);
     }
 }

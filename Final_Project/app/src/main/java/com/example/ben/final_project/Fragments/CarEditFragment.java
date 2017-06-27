@@ -78,29 +78,41 @@ public class CarEditFragment extends Fragment {
         final EditText engineVolume = (EditText) containerView.findViewById(R.id.edit_car_engine_volume);
         final Spinner category = (Spinner) containerView.findViewById(R.id.edit_car_category);
 
-        car = Model.instance.getModel(companyID,carID);
-
-        companyName.setText(car.companyName);
-        companyName.setEnabled(false);
-        carName.setText(car.modelName);
-        carDescription.setText(car.description);
-        fuelConsumption.setText(String.valueOf(car.fuelConsumption));
-        hp.setText(String.valueOf(car.hp));
-        picture.setText(String.valueOf(car.carPicture));
-        pollusion.setText(String.valueOf(car.pollution));
-        price.setText(String.valueOf(car.price));
-        warranty.setText(String.valueOf(car.warranty));
-        zeroToHundrend.setText(String.valueOf(car.zeroToHundrend));
-        engineVolume.setText(String.valueOf(car.engineVolume));
-
-        ArrayAdapter<CharSequence> categoryAdapter = ArrayAdapter.createFromResource(this.getActivity(), R.array.car_category_array, android.R.layout.simple_spinner_item);
+        final ArrayAdapter<CharSequence> categoryAdapter = ArrayAdapter.createFromResource(this.getActivity(), R.array.car_category_array, android.R.layout.simple_spinner_item);
         categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         category.setAdapter(categoryAdapter);
 
-        for(int i=0;i<categoryAdapter.getCount();i++){
-            if(car.carCategory.compareTo(categoryAdapter.getItem(i).toString()) == 0)
-                category.setSelection(i);
-        }
+        //TODO:spinner
+        Model.instance.getCar(companyID, carID, new Model.GetModelCallback() {
+            @Override
+            public void onComplete(Car onCompletecars) {
+                car = onCompletecars;
+                companyName.setText(car.companyName);
+                companyName.setEnabled(false);
+                carName.setText(car.carName);
+                carDescription.setText(car.description);
+                fuelConsumption.setText(String.valueOf(car.fuelConsumption));
+                hp.setText(String.valueOf(car.hp));
+                picture.setText(String.valueOf(car.carPicture));
+                pollusion.setText(String.valueOf(car.pollution));
+                price.setText(String.valueOf(car.price));
+                warranty.setText(String.valueOf(car.warranty));
+                zeroToHundrend.setText(String.valueOf(car.zeroToHundred));
+                engineVolume.setText(String.valueOf(car.engineVolume));
+
+                for(int i=0;i<categoryAdapter.getCount();i++){
+                    if(car.carCategory.compareTo(categoryAdapter.getItem(i).toString()) == 0)
+                        category.setSelection(i);
+                }
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+        });
+
+
 
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -133,13 +145,13 @@ public class CarEditFragment extends Fragment {
                 else{
                     if(carDescription.getText().toString().compareTo(car.description) == 0)
                         if(picture.getText().toString().compareTo(car.carPicture) == 0)
-                            if(carName.getText().toString().compareTo(car.modelName) == 0)
+                            if(carName.getText().toString().compareTo(car.carName) == 0)
                                 if(fuelConsumption.getText().toString().compareTo(String.valueOf(car.fuelConsumption)) == 0)
                                     if(hp.getText().toString().compareTo(String.valueOf(car.hp)) == 0)
                                         if(pollusion.getText().toString().compareTo(String.valueOf(car.pollution)) == 0)
                                             if(price.getText().toString().compareTo(String.valueOf(car.price)) == 0)
                                                 if(warranty.getText().toString().compareTo(String.valueOf(car.warranty)) == 0)
-                                                    if(zeroToHundrend.getText().toString().compareTo(String.valueOf(car.zeroToHundrend)) == 0)
+                                                    if(zeroToHundrend.getText().toString().compareTo(String.valueOf(car.zeroToHundred)) == 0)
                                                         if(engineVolume.getText().toString().compareTo(String.valueOf(car.engineVolume)) == 0)
                                                             if(category.getSelectedItem().toString().compareTo(String.valueOf(car.carCategory)) == 0)
                                                                 save = false;
@@ -149,11 +161,11 @@ public class CarEditFragment extends Fragment {
                 if(save == true) {
                     Car car = new Car();
                     car.carID = carID;
-                    car.modelName = carName.getText().toString();
+                    car.carName = carName.getText().toString();
                     car.hp = Integer.parseInt(hp.getText().toString());
                     car.pollution = Integer.parseInt(pollusion.getText().toString());
                     car.fuelConsumption = Integer.parseInt(fuelConsumption.getText().toString());
-                    car.zeroToHundrend = Integer.parseInt(zeroToHundrend.getText().toString());
+                    car.zeroToHundred = Integer.parseInt(zeroToHundrend.getText().toString());
                     car.carPicture = picture.getText().toString();
                     car.companyName = companyName.getText().toString();
                     car.companyID = companyID;
@@ -163,8 +175,9 @@ public class CarEditFragment extends Fragment {
                     car.price = Integer.parseInt(price.getText().toString());
                     car.carCategory = category.getSelectedItem().toString();
 
-                    if(Model.instance.editModel(companyID,car))
-                        listener.onAction(CATALOG_CAR_EDIT,null);
+                    //TODO:spinner
+                    Model.instance.editCar(car);
+                    listener.onAction(CATALOG_CAR_EDIT,null);
                 }
                 else{
                     Log.d("TAG","CompanyEditFragment did not save edited article");
@@ -185,14 +198,8 @@ public class CarEditFragment extends Fragment {
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(Model.instance.removeModel(companyID,carID) == true){
-                    Log.d("TAG","CarEditFragment Delete car");
-                    listener.onAction(CATALOG_CAR_EDIT,null);
-                }
-                else{
-                    Log.d("TAG","CarEditFragment Delete car did not succed");
-                    listener.onAction(CATALOG_CAR_EDIT,null);
-                }
+                Model.instance.removeCar(car);
+                listener.onAction(CATALOG_CAR_EDIT,null);
             }
         });
 

@@ -17,7 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.ben.final_project.Model.Car;
-import com.example.ben.final_project.Model.CarCompany;
+import com.example.ben.final_project.Model.Company;
 import com.example.ben.final_project.Model.Model;
 import com.example.ben.final_project.R;
 
@@ -66,41 +66,52 @@ public class SearchCarListResultFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d("TAG","SearchCarListResultFragment onCreateView");
         View containerView = inflater.inflate(R.layout.fragment_cars_list, container, false);
-        if(carsData.size() == 0) {
-            List<Car> temp = new LinkedList<Car>();
-            if (companyId != null) {//companyid !=null ==> specefic company
-                for (CarCompany company : Model.instance.getAllCompanies())
-                    if (company.id.compareTo(companyId) == 0)
-                        temp = Model.instance.getCompanyModels(companyId);
-            } else {//All companies
-                for (CarCompany company : Model.instance.getAllCompanies())
-                    for (Car car : Model.instance.getCompanyModels(company.id))
-                        temp.add(car);
-            }
-
-            for (int i = 0; i < temp.size(); i++) {
-                if (checkCategoryCondition(temp.get(i).carCategory, category))
-                    if (checkEngineVolumeCondition(temp.get(i).engineVolume, engineVolumeCondition))
-                        if (checkHpCondition(temp.get(i).hp, hpCondition))
-                            carsData.add(temp.get(i));
-            }
-        }
 
         TextView companyNameTW = (TextView) containerView.findViewById(R.id.car_list_company_name);
         ImageView companyImage = (ImageView) containerView.findViewById(R.id.car_list_company_image);
         companyNameTW.setText("תוצאות חיפוש");
         companyNameTW.setTextSize(25);
         companyImage.setVisibility(View.GONE);
-
-        //TODO: if there is no cars do popup
-        if(carsData.size() == 0){
-            Toast.makeText(getActivity(), "There are no results", Toast.LENGTH_SHORT).show();
-        }
-
         adapter = new CarListAdapter();
         adapter.setInflater(inflater);
         list = (ListView) containerView.findViewById(R.id.frag_cars_list);
         list.setAdapter(adapter);
+
+        Model.instance.getAllCompanies(new Model.GetAllCompaniesAndObserveCallback() {
+            @Override
+            public void onComplete(List<Company> list) {
+                if(carsData.size() == 0) {
+                    List<Car> temp = new LinkedList<Car>();
+                    if (companyId != null) {//companyid !=null ==> specefic company
+                        for (Company company : list)
+                            if (company.companyId.compareTo(companyId) == 0)
+                                temp = company.models;
+                    } else {//All companies
+                        for (Company company : list)
+                            for (Car car : company.models)
+                                temp.add(car);
+                    }
+
+                    for (int i = 0; i < temp.size(); i++) {
+                        if (checkCategoryCondition(temp.get(i).carCategory, category))
+                            if (checkEngineVolumeCondition(temp.get(i).engineVolume, engineVolumeCondition))
+                                if (checkHpCondition(temp.get(i).hp, hpCondition))
+                                    carsData.add(temp.get(i));
+                    }
+                }
+
+                //TODO: if there is no cars do popup
+                if(carsData.size() == 0){
+                    Toast.makeText(getActivity(), "There are no results", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+        });
+
 
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -181,7 +192,7 @@ public class SearchCarListResultFragment extends Fragment {
 
             Car car= carsData.get(position);
             companyLogo.setImageResource(R.drawable.car);
-            companyName.setText(car.companyName + " - " + car.modelName);
+            companyName.setText(car.companyName + " - " + car.carName);
             companyName.setTextSize(20);
 
             Log.d("TAG","car num" + position);
