@@ -48,7 +48,6 @@ public class ModelLocalFiles {
      * @param imageBitmap the Bitmap image to be saved.
      * @param imageFileName the name of the generated save file.
      */
-    //todo - asyncTask!!
     private static void saveImageToFile(Bitmap imageBitmap, String imageFileName){
         try {
             File dir = Environment.getExternalStoragePublicDirectory(
@@ -62,8 +61,6 @@ public class ModelLocalFiles {
             OutputStream out = new FileOutputStream(imageFile);
             imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
             out.close();
-
-            //addPicureToGallery(imageFile); //todo ???
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -120,7 +117,6 @@ public class ModelLocalFiles {
         return bitmap;
     }
 
-    //todo - why not in use?
     private static void addPicureToGallery(File imageFile){
         //add the picture to the gallery so we won't need to manage the pictures cache
         Intent mediaScanIntent = new

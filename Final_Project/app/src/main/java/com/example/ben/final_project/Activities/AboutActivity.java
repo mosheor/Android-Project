@@ -9,9 +9,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.example.ben.final_project.Model.Model;
 import com.example.ben.final_project.R;
 
 public class AboutActivity extends Activity {
+
+    MenuItem loginMenu;
+    MenuItem logoutMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +29,18 @@ public class AboutActivity extends Activity {
 
         menu.findItem(R.id.menu_add_icon).setVisible(false);
         menu.findItem(R.id.menu_edit_icon).setVisible(false);
+        loginMenu = menu.findItem(R.id.menu_login);
+        logoutMenu = menu.findItem(R.id.menu_signout);
+        if(!(logoutMenu == null || loginMenu == null)){
+            if(Model.instance.isConnectedUser()){
+                logoutMenu.setVisible(true);
+                loginMenu.setVisible(false);
+            }
+            else{
+                logoutMenu.setVisible(false);
+                loginMenu.setVisible(true);
+            }
+        }
 
         return true;
     }
@@ -33,6 +49,7 @@ public class AboutActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         Class intentClass = null;
         boolean commitIntent = true;
+        Log.d("TAG","about menu");
 
         //which btn from the menu was pressed?
         switch (item.getItemId()){
@@ -59,6 +76,16 @@ public class AboutActivity extends Activity {
                 commitIntent = false;
                 finish();
                 break;
+            case R.id.menu_signout:
+                commitIntent = false;
+                if(Model.instance.isConnectedUser()){
+                    Log.d("TAG","signout About");
+                    Model.instance.signOut();
+                    loginMenu.setVisible(true);
+                    logoutMenu.setVisible(false);
+                }
+                finish();
+                break;
             default:
                 throw new RuntimeException("Error articleID in btn click in the menu of AboutActivity");
         }
@@ -68,6 +95,10 @@ public class AboutActivity extends Activity {
         return true;
     }
 
+    /**
+     * Commit an intent to activity and finish this activity
+     * @param to the activity class to open
+     */
     private void commitIntentToActivityAndFinish(Class to)
     {
         Intent intent = new Intent(this, to);

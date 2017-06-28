@@ -32,19 +32,19 @@ public class Model {
     static final int RANDOM_STRING_LENGTH = 15;
     public final static Model instance = new Model(); //Singleton
 
-    private UserModel userModel;
     private ModelSQL modelSql;
     private ModelFirebaseArticleAndComment modelFirebaseArticleAndComment;
     private ModelFirebaseCompanyAndCar modelFirebaseCompanyAndCar;
     private ModelFirebaseFiles modelFirebaseFiles;
+    private AuthenticationUser authenticationUser;
 
     private Model(){
-        userModel = new UserModel();
 
         modelSql = new ModelSQL(MyApplication.getContext());
         modelFirebaseArticleAndComment = new ModelFirebaseArticleAndComment();
         modelFirebaseCompanyAndCar = new ModelFirebaseCompanyAndCar();
         modelFirebaseFiles = new ModelFirebaseFiles();
+        authenticationUser = new AuthenticationUser();
 
         //Register to get all the diffs from Firebase - the logic from the sync classes
         syncArticlesDbAndregisterArticlesUpdates();
@@ -89,23 +89,10 @@ public class Model {
     }
 
     /**
-     * GetAllArticlesAndObserveCallback interface for the async Firebase
-     * function to get all the articles (diffs) and observe
+     * get all the articles from SQLite
      */
-    public interface GetAllArticlesAndObserveCallback {
-        void onComplete(List<Article> list);
-        void onCancel();
-    }
-
-    /**
-     * get all the articles from SQLite //todo -async?!
-     * @param callback see {@link GetAllArticlesAndObserveCallback}
-     */
-    //todo - wtf thy callback??, need from firebase or sql??
-    public void getAllArticles(final GetAllArticlesAndObserveCallback callback){
-        //return ArticleSQL.getAllArticles(modelSql.getReadableDatabase());
-        List<Article> data = ArticleSQL.getAllArticles(modelSql.getReadableDatabase());
-        callback.onComplete(data);
+    public List<Article> getAllArticles(){
+        return ArticleSQL.getAllArticles(modelSql.getReadableDatabase());
     }
 
     /**
@@ -191,7 +178,6 @@ public class Model {
      * @param article the article to be saved
      */
     public void addNewArticle(Article article){
-        //ArticleSQL.addNewArticle(modelSql.getWritableDatabase(),article);
         modelFirebaseArticleAndComment.addArticle(article);
     }
 
@@ -212,7 +198,6 @@ public class Model {
      */
     public void addNewCommentToArticle(Comment comment){
         Log.d("TAG","addNewCommentToArticle model");
-        //CommentSQL.addComment(modelSql.getWritableDatabase(),comment);
         modelFirebaseArticleAndComment.addComment(comment);
     }
 
@@ -223,7 +208,6 @@ public class Model {
      */
     public void removeArticle(Article article){
         modelFirebaseArticleAndComment.removeArticle(article);
-        //ArticleSQL.removeArticle(modelSql.getWritableDatabase(),article);
     }
 
     /**
@@ -242,7 +226,6 @@ public class Model {
      * @param callback see {@link GetArticleCallback}.
      */
     public void getArticle(final String articleId, final GetArticleCallback callback) {
-        //return ArticleSQL.getArticle(modelSql.getReadableDatabase(),articleID);
         if(isNetworkAvailable()) {
             modelFirebaseArticleAndComment.getArticle(articleId, new GetArticleCallback() {
                 @Override
@@ -268,7 +251,6 @@ public class Model {
      */
     public void editArticle(Article editedArticle) {
         modelFirebaseArticleAndComment.editArticle(editedArticle);
-        //ArticleSQL.editArticle(modelSql.getWritableDatabase(),editedArticle);
     }
 
     ////////////////////////////////////////////////////////////////
@@ -358,7 +340,6 @@ public class Model {
      * @param callback see {@link GetCompanyCallback}.
      */
     public void getCompany(final String companyID, final GetCompanyCallback callback) {
-        //return ArticleSQL.getArticle(modelSql.getReadableDatabase(),articleID);
         if(isNetworkAvailable()) {
             modelFirebaseCompanyAndCar.getCompany(companyID, new ModelFirebaseCompanyAndCar.GetCompanyCallback() {
                 @Override
@@ -394,7 +375,6 @@ public class Model {
      * @param callback see {@link GetCarCallback}.
      */
     public void getCar(final String companyId, final String carId, final GetCarCallback callback) {
-        //return ArticleSQL.getArticle(modelSql.getReadableDatabase(),articleID);
         if(isNetworkAvailable()) {
             modelFirebaseCompanyAndCar.getCar(carId, new ModelFirebaseCompanyAndCar.GetModelCallback() {
                 @Override
@@ -414,15 +394,8 @@ public class Model {
         }
     }
 
-    //todo - wtf why callback??
-    public interface GetAllCompaniesAndObserveCallback {
-        void onComplete(List<Company> list);
-        void onCancel();
-    }
-    //todo - wtf why callback??
-    public void getAllCompanies(final GetAllCompaniesAndObserveCallback callback){
-        List<Company> data = CompanySQL.getAllCompanies(modelSql.getReadableDatabase());
-        callback.onComplete(data);
+    public List<Company> getAllCompanies(){
+        return CompanySQL.getAllCompanies(modelSql.getReadableDatabase());
     }
 
     /**
@@ -533,29 +506,7 @@ public class Model {
         });
     }
 
-    //todo javadoc after complete users
-    /////////////////////////////////////////////////////////////////////////////////
 
-    public User getUser(String username){
-        return userModel.getUser(username);
-    }
-
-    public boolean isValidNewUser(User user) {
-        User user1 = getUser(user.userName); //todo chane the param name
-        //todo check if the new user is valid
-        return false;
-    }
-
-    public boolean isValidUser(String username, String password){
-        User user = getUser(username);
-        if(user != null){
-            if(user.password.compareTo(password) == 0){
-                return true;
-            }
-        }
-        return false;
-    }
-    //////////////////////////////////////////////////////////////////////////////////
     /**
      * Generate a random unique id that contains {a-z}U{A-Z}U{0-9}
      * @return the random-generated id
@@ -610,7 +561,6 @@ public class Model {
      * @param listener see {@link SaveImageListener}
      */
     public void saveImage(final Bitmap imageBmp, final String name, final SaveImageListener listener) {
-        //modelFirebaseArticleAndComment.saveImage(imageBmp, name, new SaveImageListener() {
         modelFirebaseFiles.saveImage(imageBmp, name, new SaveImageListener() {
             @Override
             public void complete(String url) {
@@ -625,8 +575,6 @@ public class Model {
                 listener.fail();
             }
         });
-
-
     }
 
     /**
@@ -649,22 +597,22 @@ public class Model {
         ModelLocalFiles.loadImageFromFileAsynch(fileName, new ModelLocalFiles.LoadImageFromFileAsynch() {
             @Override
             public void onComplete(Bitmap bitmap) {
-                if (bitmap != null){
-                    Log.d("TAG","getImage from local success " + fileName);
+                if (bitmap != null) {
+                    Log.d("TAG", "getImage from local success " + fileName);
                     listener.onSuccess(bitmap);
-                }else {
+                } else {
                     modelFirebaseFiles.getImage(url, new GetImageListener() {
                         @Override
                         public void onSuccess(Bitmap image) {
                             String fileName = URLUtil.guessFileName(url, null, null);
-                            Log.d("TAG","getImage from FB success " + fileName);
-                            saveImageToFileAsynch(image,fileName);
+                            Log.d("TAG", "getImage from FB success " + fileName);
+                            saveImageToFileAsynch(image, fileName);
                             listener.onSuccess(image);
                         }
 
                         @Override
                         public void onFail() {
-                            Log.d("TAG","getImage from FB fail ");
+                            Log.d("TAG", "getImage from FB fail ");
                             listener.onFail();
                         }
                     });
@@ -674,4 +622,60 @@ public class Model {
         });
     }
 
+
+
+    public void createAccount(String email, String password, final AuthenticationUser.CreateAccountCallback callback){
+        authenticationUser.createAccount(email, password, new AuthenticationUser.CreateAccountCallback() {
+            @Override
+            public void onComplete() {
+                callback.onComplete();
+            }
+
+            @Override
+            public void onFail() {
+                callback.onFail();
+            }
+        });
+    }
+
+    public void signIn(String email, String password, final AuthenticationUser.CreateAccountCallback callback){
+        authenticationUser.signIn(email, password, new AuthenticationUser.SignInCallback() {
+            @Override
+            public void onComplete() {
+                callback.onComplete();
+            }
+
+            @Override
+            public void onFail() {
+                callback.onFail();
+            }
+        });
+    }
+
+    public boolean isConnectedUser(){
+        return authenticationUser.isConnectedUser();
+    }
+
+    public String getConnectedUserEmail(){
+        return authenticationUser.getConnectedUserEmail();
+    }
+
+    public String getConnectedUserUsername(){
+        return authenticationUser.getConnectedUserUsername();
+    }
+
+
+    public void signOut() {
+        authenticationUser.signOut();
+    }
+
+    public boolean isAdmin(){
+        return Model.instance.getConnectedUserEmail().equals("benmazliach@gmail.com");
+    }
+
+
 }
+
+
+
+

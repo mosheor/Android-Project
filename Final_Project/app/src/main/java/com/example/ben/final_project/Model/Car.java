@@ -19,7 +19,7 @@ public class Car {
     public String carCategory;
     public int engineVolume;
     public int hp; // horse powers
-    public int pollution;//TODO:in add new company to do in this text 1 from 15 - scala
+    public int pollution;//in add new company to do in this text 1 from 15 - scala
     public float price;
     public int warranty;
     public float zeroToHundred;

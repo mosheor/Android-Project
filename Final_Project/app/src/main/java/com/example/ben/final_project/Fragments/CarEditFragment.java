@@ -89,15 +89,17 @@ public class CarEditFragment extends Fragment implements GetPicture {
         imageUrl = (ImageView) containerView.findViewById(R.id.edit_car_image);
         progressBar = (ProgressBar) containerView.findViewById(R.id.edit_car_progressBar);
         progressBar.setVisibility(GONE);
+        final ProgressBar progressBarAllLayout = (ProgressBar) containerView.findViewById(R.id.edit_car_progressBar_all_layout);
+        progressBarAllLayout.setVisibility(View.VISIBLE);
 
         final ArrayAdapter<CharSequence> categoryAdapter = ArrayAdapter.createFromResource(this.getActivity(), R.array.car_category_array, android.R.layout.simple_spinner_item);
         categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         category.setAdapter(categoryAdapter);
 
-        //TODO:spinner
         Model.instance.getCar(companyID, carID, new Model.GetCarCallback() {
             @Override
             public void onComplete(Car onCompletecars) {
+                progressBarAllLayout.setVisibility(View.GONE);
                 car = onCompletecars;
                 companyName.setText(car.companyName);
                 companyName.setEnabled(false);
@@ -111,19 +113,23 @@ public class CarEditFragment extends Fragment implements GetPicture {
                 zeroToHundrend.setText(String.valueOf(car.zeroToHundred));
                 engineVolume.setText(String.valueOf(car.engineVolume));
 
-                progressBar.setVisibility(View.VISIBLE);
-                Model.instance.getImage(car.carPicture, new Model.GetImageListener() {
-                    @Override
-                    public void onSuccess(Bitmap image) {
-                        imageUrl.setImageBitmap(image);
-                        progressBar.setVisibility(View.GONE);
-                    }
+                if(!car.carPicture.equals("")) {
+                    progressBar.setVisibility(View.VISIBLE);
+                    Model.instance.getImage(car.carPicture, new Model.GetImageListener() {
+                        @Override
+                        public void onSuccess(Bitmap image) {
+                            imageUrl.setImageBitmap(image);
+                            progressBar.setVisibility(View.GONE);
+                        }
 
-                    @Override
-                    public void onFail() {
+                        @Override
+                        public void onFail() {
 
-                    }
-                });
+                        }
+                    });
+                }
+                else
+                    imageUrl.setImageResource(R.drawable.blue_plus_icon);
 
                 for(int i=0;i<categoryAdapter.getCount();i++){
                     if(car.carCategory.compareTo(categoryAdapter.getItem(i).toString()) == 0)
@@ -144,11 +150,11 @@ public class CarEditFragment extends Fragment implements GetPicture {
             public void onClick(View v) {
                 if (Model.instance.isNetworkAvailable()) {
                     Log.d("TAG", "CompanyEditFragment Btn Save click");
-
+                    progressBarAllLayout.setVisibility(View.VISIBLE);
                     int ok = 0;
                     boolean save = true;
 
-                    ok += valid(carDescription, "Description is required!");//TODO:write errors in hebrew
+                    ok += valid(carDescription, "Description is required!");
                     ok += valid(carName, "Car name is required!");
                     ok += valid(fuelConsumption, "Fuel consumption is required!");
                     ok += valid(hp, "Horse powers is required!");
@@ -157,10 +163,10 @@ public class CarEditFragment extends Fragment implements GetPicture {
                     ok += valid(warranty, "Car warranty is required!");
                     ok += valid(zeroToHundrend, "0-100 is required!");
                     ok += valid(engineVolume, "Engine volume is required!");
-                    ok += checkIfInteger(fuelConsumption);
+                    ok += checkIfFloat(fuelConsumption);
                     ok += checkIfInteger(hp);
                     ok += checkIfInteger(pollusion);
-                    ok += checkIfInteger(price);
+                    ok += checkIfFloat(price);
                     ok += checkIfInteger(warranty);
                     ok += checkIfFloat(zeroToHundrend);
                     ok += checkIfInteger(engineVolume);
@@ -178,7 +184,7 @@ public class CarEditFragment extends Fragment implements GetPicture {
                                                     if (zeroToHundrend.getText().toString().compareTo(String.valueOf(car.zeroToHundred)) == 0)
                                                         if (engineVolume.getText().toString().compareTo(String.valueOf(car.engineVolume)) == 0)
                                                             if (category.getSelectedItem().toString().compareTo(String.valueOf(car.carCategory)) == 0)
-                                                                if (imageBitmap != null)
+                                                                if (imageBitmap == null)
                                                                     save = false;
 
                     }
@@ -189,8 +195,8 @@ public class CarEditFragment extends Fragment implements GetPicture {
                         car.carName = carName.getText().toString();
                         car.hp = Integer.parseInt(hp.getText().toString());
                         car.pollution = Integer.parseInt(pollusion.getText().toString());
-                        car.fuelConsumption = Integer.parseInt(fuelConsumption.getText().toString());
-                        car.zeroToHundred = Integer.parseInt(zeroToHundrend.getText().toString());
+                        car.fuelConsumption = Float.parseFloat(fuelConsumption.getText().toString());
+                        car.zeroToHundred = Float.parseFloat(zeroToHundrend.getText().toString());
                         car.companyName = companyName.getText().toString();
                         car.companyID = companyID;
                         car.description = carDescription.getText().toString();
@@ -206,6 +212,7 @@ public class CarEditFragment extends Fragment implements GetPicture {
                                     car.carPicture = url;
                                     Model.instance.editCar(car);
                                     progressBar.setVisibility(GONE);
+                                    progressBarAllLayout.setVisibility(View.GONE);
                                     listener.onAction(CATALOG_CAR_EDIT, null);
                                 }
 
@@ -213,6 +220,7 @@ public class CarEditFragment extends Fragment implements GetPicture {
                                 public void fail() {
                                     //notify operation fail,...
                                     progressBar.setVisibility(GONE);
+                                    progressBarAllLayout.setVisibility(View.GONE);
                                     listener.onAction(CATALOG_CAR_EDIT, null);
                                 }
                             });
@@ -220,6 +228,7 @@ public class CarEditFragment extends Fragment implements GetPicture {
                             car.carPicture = "";
                             Model.instance.editCar(car);
                             progressBar.setVisibility(GONE);
+                            progressBarAllLayout.setVisibility(View.GONE);
                             listener.onAction(CATALOG_CAR_EDIT, null);
                         }
                     } else {
@@ -237,8 +246,6 @@ public class CarEditFragment extends Fragment implements GetPicture {
         imageUrl.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO:go to galary/camera
-                //dispatchTakePictureIntent();
                 progressBar.setVisibility(View.VISIBLE);
                 listener.onAction(CATALOG_ADD_PICTURE,null);
             }

@@ -49,12 +49,11 @@ public class ArticlesListFragment extends Fragment{
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMessageEvent(Model.UpdateArticleEvent event) {
-        Toast.makeText(getActivity(), "got new article event", Toast.LENGTH_SHORT).show();
         Log.d("TAG","new article");
         boolean exist = false;
         for (Article article : articlesData) {
             if (article.articleID.equals(event.article.articleID)) {
-                if(event.article.wasDeleted == false)
+                if(!event.article.wasDeleted)
                     article = event.article;
                 else
                     articlesData.remove(articlesData.indexOf(article));
@@ -63,7 +62,7 @@ public class ArticlesListFragment extends Fragment{
                 break;
             }
         }
-        if (!exist && event.article.wasDeleted == false) {
+        if (!exist && !event.article.wasDeleted) {
             articlesData.add(event.article);
         }
         adapter.notifyDataSetChanged();
@@ -77,7 +76,6 @@ public class ArticlesListFragment extends Fragment{
         adapter = new ArticleListAdapter();
         adapter.setInflater(inflater);
         list = (ListView) containerView.findViewById(R.id.articles_list_frag);
-        list.setAdapter(adapter);
 
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -89,19 +87,11 @@ public class ArticlesListFragment extends Fragment{
             }
         });
 
-        Model.instance.getAllArticles(new Model.GetAllArticlesAndObserveCallback() {
-            @Override
-            public void onComplete(List<Article> list) {
-                Log.d("TAG","all articles list");
-                articlesData = list;
-                adapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onCancel() {
-
-            }
-        });
+        articlesData = Model.instance.getAllArticles();
+        if(articlesData.size() == 0)
+            Toast.makeText(getActivity(),"There are no articles",Toast.LENGTH_SHORT).show();
+        list.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
         return containerView;
     }
 
@@ -205,8 +195,6 @@ public class ArticlesListFragment extends Fragment{
             }
             else
                 articleImage.setImageResource(R.drawable.car_icon);
-
-            Log.d("TAG","art num" + position);
 
             return convertView;
         }

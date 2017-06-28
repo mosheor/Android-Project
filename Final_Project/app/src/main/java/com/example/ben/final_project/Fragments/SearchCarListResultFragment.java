@@ -77,40 +77,31 @@ public class SearchCarListResultFragment extends Fragment {
         list = (ListView) containerView.findViewById(R.id.frag_cars_list);
         list.setAdapter(adapter);
 
-        Model.instance.getAllCompanies(new Model.GetAllCompaniesAndObserveCallback() {
-            @Override
-            public void onComplete(List<Company> list) {
-                if(carsData.size() == 0) {
-                    List<Car> temp = new LinkedList<Car>();
-                    if (companyId != null) {//companyid !=null ==> specefic company
-                        for (Company company : list)
-                            if (company.companyId.compareTo(companyId) == 0)
-                                temp = company.models;
-                    } else {//All companies
-                        for (Company company : list)
-                            for (Car car : company.models)
-                                temp.add(car);
-                    }
+        List<Company> companyList = Model.instance.getAllCompanies();
 
-                    for (int i = 0; i < temp.size(); i++) {
-                        if (checkCategoryCondition(temp.get(i).carCategory, category))
-                            if (checkEngineVolumeCondition(temp.get(i).engineVolume, engineVolumeCondition))
-                                if (checkHpCondition(temp.get(i).hp, hpCondition))
-                                    carsData.add(temp.get(i));
-                    }
-                }
-
-                //TODO: if there is no cars do popup
-                if(carsData.size() == 0){
-                    Toast.makeText(getActivity(), "There are no results", Toast.LENGTH_SHORT).show();
-                }
+        if(carsData.size() == 0) {
+            List<Car> temp = new LinkedList<Car>();
+            if (companyId != null) {//companyid !=null ==> specefic company
+                for (Company company : companyList)
+                    if (company.companyId.compareTo(companyId) == 0)
+                        temp = company.models;
+            } else {//All companies
+                for (Company company : companyList)
+                    for (Car car : company.models)
+                        temp.add(car);
             }
 
-            @Override
-            public void onCancel() {
-
+            for (int i = 0; i < temp.size(); i++) {
+                if (checkCategoryCondition(temp.get(i).carCategory, category))
+                    if (checkEngineVolumeCondition(temp.get(i).engineVolume, engineVolumeCondition))
+                        if (checkHpCondition(temp.get(i).hp, hpCondition))
+                            carsData.add(temp.get(i));
             }
-        });
+        }
+
+        if(carsData.size() == 0){
+            Toast.makeText(getActivity(), "There are no results", Toast.LENGTH_SHORT).show();
+        }
 
 
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {

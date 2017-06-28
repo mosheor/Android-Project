@@ -76,19 +76,23 @@ public class CarDetailsFragment extends Fragment {
                 fuelConsumption.setText(carData.fuelConsumption + " ליטר ל - 100 קילומטר");
                 category.setText(carData.carCategory);
 
-                progressBar.setVisibility(View.VISIBLE);
-                Model.instance.getImage(car.carPicture, new Model.GetImageListener() {
-                    @Override
-                    public void onSuccess(Bitmap imageLoad) {
-                        carPic.setImageBitmap(imageLoad);
-                        progressBar.setVisibility(View.GONE);
-                    }
+                if(!car.carPicture.equals("")) {
+                    progressBar.setVisibility(View.VISIBLE);
+                    Model.instance.getImage(car.carPicture, new Model.GetImageListener() {
+                        @Override
+                        public void onSuccess(Bitmap imageLoad) {
+                            carPic.setImageBitmap(imageLoad);
+                            progressBar.setVisibility(View.GONE);
+                        }
 
-                    @Override
-                    public void onFail() {
+                        @Override
+                        public void onFail() {
 
-                    }
-                });
+                        }
+                    });
+                }
+                else
+                    carPic.setImageResource(R.drawable.car_icon);
             }
 
             @Override

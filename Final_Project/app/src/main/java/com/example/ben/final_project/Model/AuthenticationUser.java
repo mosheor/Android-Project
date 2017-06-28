@@ -4,8 +4,11 @@ import android.app.Activity;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
+import com.example.ben.final_project.Activities.LoginActivity;
+import com.example.ben.final_project.Activities.RegisterActivity;
 import com.example.ben.final_project.MyApplication;
 import com.example.ben.final_project.R;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -14,81 +17,98 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.concurrent.Executor;
+
 /**
  * Created by mazliachbe on 25/06/2017.
  */
 
 public class AuthenticationUser {
 
-    public FirebaseUser getCurrentUser(){
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        return mAuth.getCurrentUser();
+    FirebaseUser connectedUser;
+    FirebaseAuth mAuth;
+
+    public AuthenticationUser(){
+        mAuth = FirebaseAuth.getInstance();
     }
 
-    interface AuthentecationCallback{
-        void succes();
-        void fail();
+    public interface CreateAccountCallback{
+        void onComplete();
+        void onFail();
     }
 
-    public void createAccount(String email, String password, final AuthentecationCallback listener) {
-        Log.d("TAG", "createAccount:" + email);
-        final FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    void createAccount(String email, String password, final CreateAccountCallback callback) {
         // [START create_user_with_email]
         mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener((Activity) MyApplication.getContext(), new OnCompleteListener<AuthResult>() {
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
                             Log.d("TAG", "createUserWithEmail:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            listener.succes();
+                            callback.onComplete();
                         } else {
-                            Log.d("TAG", "createUserWithEmail:failure", task.getException());
-                            listener.fail();
+                            // If sign in fails, display a message to the user.
+                            Log.w("TAG", "createUserWithEmail:failure", task.getException());
+                            callback.onFail();
                         }
                     }
                 });
+        // [END create_user_with_email]
     }
 
-    public void signIn(String email, String password, final AuthentecationCallback listener) {
-        Log.d("TAG", "signIn:" + email);
-        final FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    interface SignInCallback{
+        void onComplete();
+        void onFail();
+    }
+
+     void signIn(String email, String password, final SignInCallback callback) {
+        // [START sign_in_with_email]
         mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener((Activity) MyApplication.getContext(), new OnCompleteListener<AuthResult>() {
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
                             Log.d("TAG", "signInWithEmail:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            listener.succes();
+                            connectedUser = mAuth.getCurrentUser();
+                            callback.onComplete();
                         } else {
-                            Log.d("TAG", "signInWithEmail:failure", task.getException());
-                            listener.fail();
+                            // If sign in fails, display a message to the user.
+                            Log.w("TAG", "signInWithEmail:failure", task.getException());
+                            callback.onFail();
                         }
+
+                        // [START_EXCLUDE]
+                        if (!task.isSuccessful()) {
+                            callback.onFail();
+                        }
+                        // [END_EXCLUDE]
                     }
                 });
+        // [END sign_in_with_email]
     }
 
-    public void signOut() {
-        final FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    boolean isConnectedUser(){
+        if(connectedUser!=null)
+            return true;
+        return false;
+    }
+
+    String getConnectedUserEmail(){
+        if(connectedUser!=null)
+            return connectedUser.getEmail();
+        return null;
+    }
+
+    String getConnectedUserUsername(){
+        if(connectedUser!=null)
+            return connectedUser.getEmail().substring(0,connectedUser.getEmail().indexOf("@"));
+        return null;
+    }
+
+    void signOut() {
         mAuth.signOut();
+        connectedUser = null;
     }
-
-   /* public void getCurrentUserData(){
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            // Name, email address, and profile photo Url
-            String name = user.getDisplayName();
-            String email = user.getEmail();
-            Uri photoUrl = user.getPhotoUrl();
-
-            // Check if user's email is verified
-            boolean emailVerified = user.isEmailVerified();
-
-            // The user's ID, unique to the Firebase project. Do NOT use this value to
-            // authenticate with your backend server, if you have one. Use
-            // FirebaseUser.getToken() instead.
-            String uid = String.valueOf(user.getIdToken(true));
-        }
-    }*/
 }

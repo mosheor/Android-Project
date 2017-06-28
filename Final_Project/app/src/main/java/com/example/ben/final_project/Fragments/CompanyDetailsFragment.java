@@ -68,19 +68,23 @@ public class CompanyDetailsFragment extends Fragment {
                 companyName.setText(companyData.name);
                 numOfModels.setText("" + companyData.models.size());
 
-                progressBar.setVisibility(View.VISIBLE);
-                Model.instance.getImage(company.companyLogo, new Model.GetImageListener() {
-                    @Override
-                    public void onSuccess(Bitmap imageLoad) {
-                        companyPic.setImageBitmap(imageLoad);
-                        progressBar.setVisibility(View.GONE);
-                    }
+                if(!company.companyLogo.equals("")) {
+                    progressBar.setVisibility(View.VISIBLE);
+                    Model.instance.getImage(company.companyLogo, new Model.GetImageListener() {
+                        @Override
+                        public void onSuccess(Bitmap imageLoad) {
+                            companyPic.setImageBitmap(imageLoad);
+                            progressBar.setVisibility(View.GONE);
+                        }
 
-                    @Override
-                    public void onFail() {
+                        @Override
+                        public void onFail() {
 
-                    }
-                });
+                        }
+                    });
+                }
+                else
+                    companyPic.setImageResource(R.drawable.car_icon);
             }
 
             @Override

@@ -5,6 +5,7 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -26,6 +27,9 @@ import com.example.ben.final_project.Model.Company;
 import com.example.ben.final_project.Model.Model;
 import com.example.ben.final_project.R;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+
 
 public class CarCatalogActivity extends Activity implements FragmentsDelegate{
 
@@ -45,9 +49,10 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
     String carClickedID;;
     MenuItem addItem;
     MenuItem editItem;
+    MenuItem loginMenu;
+    MenuItem logoutMenu;
     int currentFragment;
-    /*TODO:This string is if I clicked on add/edit icon. Sign what we need -
-    TODO: - add/edit car or company*/
+    boolean adminUser = false;
 
 
     @Override
@@ -66,10 +71,33 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
         inflater.inflate(R.menu.menu_list, menu);
 
         this.addItem = menu.findItem(R.id.menu_add_icon);
-        this.addItem.setVisible(true);
-
         this.editItem = menu.findItem(R.id.menu_edit_icon);
-        this.editItem.setVisible(false);
+        loginMenu = menu.findItem(R.id.menu_login);
+        logoutMenu = menu.findItem(R.id.menu_signout);
+
+        if(Model.instance.isConnectedUser() && Model.instance.isNetworkAvailable()) {
+            if (Model.instance.isAdmin()) {
+                adminUser = true;
+                this.addItem.setVisible(true);
+                this.editItem.setVisible(false);
+            }
+        }
+        if(!adminUser){
+                this.addItem.setVisible(false);
+                this.editItem.setVisible(false);
+        }
+
+        if(!(logoutMenu == null || loginMenu == null)){
+            Log.d("TAG","connect = " + Model.instance.isConnectedUser());
+            if(Model.instance.isConnectedUser()){
+                logoutMenu.setVisible(true);
+                loginMenu.setVisible(false);
+            }
+            else{
+                logoutMenu.setVisible(false);
+                loginMenu.setVisible(true);
+            }
+        }
 
         return true;
     }
@@ -107,13 +135,13 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
             case R.id.menu_add_icon:
                 if(Model.instance.isNetworkAvailable()) {
                     if (companyClickedID == null) {//add company
-                        CompanyAddFragment addCompanyFragment = CompanyAddFragment.newInstance("0");
+                        CompanyAddFragment addCompanyFragment = new CompanyAddFragment();
                         imageDelegate = addCompanyFragment;
                         openFragment(addCompanyFragment);
                         item.setVisible(false);
                         currentFragment = CATALOG_COMPANY_ADD;
                     } else {
-                        CarAddFragment addCarFragment = CarAddFragment.newInstance(companyClickedID, "0");
+                        CarAddFragment addCarFragment = CarAddFragment.newInstance(companyClickedID);
                         imageDelegate = addCarFragment;
                         openFragment(addCarFragment);
                         item.setVisible(false);
@@ -129,7 +157,7 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
                 if(Model.instance.isNetworkAvailable()) {
                     if (companyClickedID != null && carClickedID == null) {//edit company
                         Log.d("TAG", "CarCatalogActivity edit articleID " + companyClickedID);
-                        CompanyEditFragment editCompanyFragment = CompanyEditFragment.newInstance(String.valueOf(companyClickedID));//todo in line
+                        CompanyEditFragment editCompanyFragment = CompanyEditFragment.newInstance(String.valueOf(companyClickedID));
                         imageDelegate = editCompanyFragment;
                         openFragment(editCompanyFragment);
                         item.setVisible(false);
@@ -147,6 +175,16 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
                     Toast.makeText(this, "there is not connection", Toast.LENGTH_SHORT).show();
                 commitIntent = false;
                 break;
+            case R.id.menu_signout:
+                commitIntent = false;
+                if(Model.instance.isConnectedUser()){
+                    Log.d("TAG","signout About");
+                    Model.instance.signOut();
+                    loginMenu.setVisible(true);
+                    logoutMenu.setVisible(false);
+                }
+                finish();
+                break;
             default:
                 throw new RuntimeException("Error articleID in btn click in the menu of CarCatalogActivity");
         }
@@ -156,21 +194,54 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
         return true;
     }
 
+    /**
+     * intent for taking a picture from camera or from gallery
+     */
     private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, CATALOG_ADD_PICTURE);
-        }
+        Intent pickIntent = new Intent();
+        pickIntent.setType("image/*");
+        pickIntent.setAction(Intent.ACTION_GET_CONTENT);
+        Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        String pickTitle = "Select or take a new Picture"; // Or get from strings.xml
+        Intent chooserIntent = Intent.createChooser(pickIntent, pickTitle);
+        chooserIntent.putExtra
+                (
+                        Intent.EXTRA_INITIAL_INTENTS,
+                        new Intent[] { takePhotoIntent }
+                );
+
+        startActivityForResult(chooserIntent, CATALOG_ADD_PICTURE);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CATALOG_ADD_PICTURE && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            imageDelegate.getPicture((Bitmap) extras.get("data"));
+            if(data.getData() != null) {
+                try {
+                    InputStream inputStream = getContentResolver().openInputStream(data.getData());
+                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                    imageDelegate.getPicture(bitmap);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                Bundle extras = data.getExtras();
+                imageDelegate.getPicture((Bitmap) extras.get("data"));
+            }
+        }
+        else
+        {
+            //stop the ProgressBar
+            imageDelegate.getPicture(null);
         }
     }
 
+    /**
+     * Commit an intent to activity and finish this activity
+     * @param to the activity class to open
+     */
     private void commitIntentToActivityAndFinish(Class to)
     {
         Intent intent = new Intent(this, to);
@@ -178,6 +249,10 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
         finish();
     }
 
+    /**
+     * Opens a fragment and add to addToBackStack
+     * @param frag the frag to open
+     */
     private void openFragment(Fragment frag){
         FragmentTransaction tran = getFragmentManager().beginTransaction();
         tran.replace(R.id.car_catalog_frame_fragment, frag);
@@ -185,6 +260,9 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
         tran.commit();
     }
 
+    /**
+     * Replace the current fragment to openCompanyListFragment fragment
+     */
     private void openCompanyListFragment(){
         currentFragment = CATALOG_COMPANY_LIST;
         companyListFragment = new CompanyListFragment();
@@ -199,8 +277,14 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
             case CATALOG_CAR_ADD:
                 companyListFragment = new CompanyListFragment();
                 openCompanyListFragment();
-                addItem.setVisible(true);
-                editItem.setVisible(false);
+                if(adminUser) {
+                    addItem.setVisible(true);
+                    editItem.setVisible(false);
+                }
+                else{
+                    addItem.setVisible(false);
+                    editItem.setVisible(false);
+                }
                 companyClickedID = null;
                 carClickedID = null;
                 currentFragment = CATALOG_CAR_LIST;
@@ -210,10 +294,16 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
                     @Override
                     public void onComplete(Car car) {
                         carClickedID = car.carID;
-                        CarDetailsFragment carDetailsFragment = CarDetailsFragment.newInstance(companyClickedID,carClickedID);// todo carDetailsFragment OR CarDetailsFragment ???
+                        CarDetailsFragment carDetailsFragment = CarDetailsFragment.newInstance(companyClickedID,carClickedID);
                         openFragment(carDetailsFragment);
-                        addItem.setVisible(false);
-                        editItem.setVisible(true);
+                        if(adminUser) {
+                            addItem.setVisible(false);
+                            editItem.setVisible(true);
+                        }
+                        else{
+                            addItem.setVisible(false);
+                            editItem.setVisible(false);
+                        }
                         currentFragment = CATALOG_CAR_DETAILS;
                     }
 
@@ -228,8 +318,14 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
                 if(Model.instance.isNetworkAvailable()) {
                     companyListFragment = new CompanyListFragment();
                     openCompanyListFragment();
-                    addItem.setVisible(true);
-                    editItem.setVisible(false);
+                    if(adminUser) {
+                        addItem.setVisible(true);
+                        editItem.setVisible(false);
+                    }
+                    else{
+                        addItem.setVisible(false);
+                        editItem.setVisible(false);
+                    }
                     companyClickedID = null;
                     carClickedID = null;
                     currentFragment = CATALOG_CAR_LIST;
@@ -244,8 +340,14 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
                         companyClickedID = company.companyId;
                         CarListFragment carListFragment = CarListFragment.newInstance(companyClickedID);
                         openFragment(carListFragment);
-                        addItem.setVisible(true);
-                        editItem.setVisible(false);
+                        if(adminUser) {
+                            addItem.setVisible(true);
+                            editItem.setVisible(false);
+                        }
+                        else{
+                            addItem.setVisible(false);
+                            editItem.setVisible(false);
+                        }
                         currentFragment = CATALOG_CAR_LIST;
                     }
 
@@ -259,8 +361,14 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
                 if(Model.instance.isNetworkAvailable()) {
                     companyListFragment = new CompanyListFragment();
                     openCompanyListFragment();
-                    addItem.setVisible(true);
-                    editItem.setVisible(false);
+                    if(adminUser) {
+                        addItem.setVisible(true);
+                        editItem.setVisible(false);
+                    }
+                    else{
+                        addItem.setVisible(false);
+                        editItem.setVisible(false);
+                    }
                     companyClickedID = null;
                     currentFragment = CATALOG_COMPANY_LIST;
                 }
@@ -274,8 +382,14 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
                         companyClickedID = company.companyId;
                         CompanyDetailsFragment companyDetailsFragment = CompanyDetailsFragment.newInstance(companyClickedID);
                         openFragment(companyDetailsFragment);
-                        addItem.setVisible(false);
-                        editItem.setVisible(true);
+                        if(adminUser) {
+                            addItem.setVisible(false);
+                            editItem.setVisible(true);
+                        }
+                        else{
+                            addItem.setVisible(false);
+                            editItem.setVisible(false);
+                        }
                         currentFragment = CATALOG_COMPANY_DETAILS;
                     }
 
@@ -289,8 +403,14 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
                 if(Model.instance.isNetworkAvailable()) {
                     companyListFragment = new CompanyListFragment();
                     openCompanyListFragment();
-                    addItem.setVisible(true);
-                    editItem.setVisible(false);
+                    if(adminUser) {
+                        addItem.setVisible(true);
+                        editItem.setVisible(false);
+                    }
+                    else{
+                        addItem.setVisible(false);
+                        editItem.setVisible(false);
+                    }
                     currentFragment = CATALOG_COMPANY_LIST;
                     companyClickedID = null;
                 }
@@ -310,38 +430,80 @@ public class CarCatalogActivity extends Activity implements FragmentsDelegate{
         super.onBackPressed();
         switch(currentFragment){
             case CATALOG_CAR_ADD:
-                editItem.setVisible(false);
-                addItem.setVisible(true);
+                if(adminUser) {
+                    editItem.setVisible(false);
+                    addItem.setVisible(true);
+                }
+                else{
+                    addItem.setVisible(false);
+                    editItem.setVisible(false);
+                }
                 currentFragment = CATALOG_CAR_LIST;
                 break;
             case CATALOG_CAR_DETAILS:
-                editItem.setVisible(false);
-                addItem.setVisible(true);
+                if(adminUser) {
+                    editItem.setVisible(false);
+                    addItem.setVisible(true);
+                }
+                else{
+                    addItem.setVisible(false);
+                    editItem.setVisible(false);
+                }
                 currentFragment = CATALOG_CAR_LIST;
                 break;
             case CATALOG_CAR_EDIT:
-                editItem.setVisible(true);
-                addItem.setVisible(false);
+                if(adminUser) {
+                    editItem.setVisible(true);
+                    addItem.setVisible(false);
+                }
+                else{
+                    addItem.setVisible(false);
+                    editItem.setVisible(false);
+                }
                 currentFragment = CATALOG_CAR_DETAILS;
                 break;
             case CATALOG_CAR_LIST:
-                editItem.setVisible(false);
-                addItem.setVisible(true);
+                if(adminUser) {
+                    editItem.setVisible(false);
+                    addItem.setVisible(true);
+                }
+                else{
+                    addItem.setVisible(false);
+                    editItem.setVisible(false);
+                }
                 currentFragment = CATALOG_COMPANY_LIST;
                 break;
             case CATALOG_COMPANY_ADD:
-                editItem.setVisible(false);
-                addItem.setVisible(true);
+                if(adminUser) {
+                    editItem.setVisible(false);
+                    addItem.setVisible(true);
+                }
+                else{
+                    addItem.setVisible(false);
+                    editItem.setVisible(false);
+                }
                 currentFragment = CATALOG_COMPANY_LIST;
                 break;
             case CATALOG_COMPANY_DETAILS:
-                editItem.setVisible(false);
-                addItem.setVisible(true);
+                if(adminUser) {
+                    editItem.setVisible(false);
+                    addItem.setVisible(true);
+                }
+                else{
+                    addItem.setVisible(false);
+                    editItem.setVisible(false);
+                }
                 currentFragment = CATALOG_COMPANY_LIST;
                 break;
             case CATALOG_COMPANY_EDIT:
-                editItem.setVisible(true);
-                addItem.setVisible(false);
+                if(adminUser) {
+                    editItem.setVisible(true);
+                    addItem.setVisible(false);
+                }
+                else{
+                    addItem.setVisible(false);
+                    editItem.setVisible(false);
+                }
                 currentFragment = CATALOG_COMPANY_DETAILS;
                 break;
             case CATALOG_COMPANY_LIST:

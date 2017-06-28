@@ -31,19 +31,16 @@ import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALO
 
 public class CarAddFragment extends Fragment implements GetPicture {
     private static final String ARG_PARAM1 = "param1";//company articleID
-    private static final String ARG_PARAM2 = "param2";//last car articleID
     private String companyId;
-    private String carId;
     private FragmentsDelegate listener;
     ImageView imageUrl;
     ProgressBar progressBar;
     Bitmap imageBitmap;
 
-    public static CarAddFragment newInstance(String param1, String param2) {
+    public static CarAddFragment newInstance(String param1) {
         CarAddFragment fragment = new CarAddFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -57,7 +54,6 @@ public class CarAddFragment extends Fragment implements GetPicture {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             companyId = getArguments().getString(ARG_PARAM1);
-            carId = getArguments().getString(ARG_PARAM2);
         }
     }
 
@@ -83,12 +79,15 @@ public class CarAddFragment extends Fragment implements GetPicture {
         imageUrl = (ImageView) containerView.findViewById(R.id.add_car_image);
         progressBar = (ProgressBar) containerView.findViewById(R.id.add_car_progressBar);
         progressBar.setVisibility(GONE);
+        final ProgressBar progressBarAllLayout = (ProgressBar) containerView.findViewById(R.id.add_car_progressBar_all_layout);
+        progressBarAllLayout.setVisibility(View.VISIBLE);
 
         Model.instance.getCompany(companyID, new Model.GetCompanyCallback() {
             @Override
             public void onComplete(Company company) {
                 companyName.setText(company.name);
                 companyName.setEnabled(false);
+                progressBarAllLayout.setVisibility(View.GONE);
             }
 
             @Override
@@ -106,11 +105,12 @@ public class CarAddFragment extends Fragment implements GetPicture {
             public void onClick(View v) {
                 if(Model.instance.isNetworkAvailable()) {
                     Log.d("TAG", "CarAddFragment Btn Save click");
+                    progressBarAllLayout.setVisibility(View.VISIBLE);
 
                     int ok = 0;
                     boolean save = true;
 
-                    ok += valied(carDescription, "Description is required!");//TODO:write errors in hebrew
+                    ok += valied(carDescription, "Description is required!");
                     ok += valied(carName, "Car name is required!");
                     ok += valied(fuelConsumption, "Fuel consumption is required!");
                     ok += valied(hp, "Horse powers is required!");
@@ -145,6 +145,7 @@ public class CarAddFragment extends Fragment implements GetPicture {
                         car.warranty = Integer.parseInt(warranty.getText().toString());
                         car.price = Float.parseFloat(price.getText().toString());
                         car.carCategory = category.getSelectedItem().toString();
+                        car.carPicture = "";
 
                         if (imageBitmap != null) {
                             Model.instance.saveImage(imageBitmap,  Model.generateRandomId()  + ".jpeg", new Model.SaveImageListener() {
@@ -153,6 +154,7 @@ public class CarAddFragment extends Fragment implements GetPicture {
                                     car.carPicture = url;
                                     Model.instance.addNewCarToCompany(car);
                                     progressBar.setVisibility(GONE);
+                                    progressBarAllLayout.setVisibility(View.GONE);
                                     listener.onAction(CATALOG_CAR_ADD, null);
                                 }
 
@@ -160,6 +162,7 @@ public class CarAddFragment extends Fragment implements GetPicture {
                                 public void fail() {
                                     //notify operation fail,...
                                     progressBar.setVisibility(GONE);
+                                    progressBarAllLayout.setVisibility(View.GONE);
                                     listener.onAction(CATALOG_CAR_ADD, null);
                                 }
                             });
@@ -167,6 +170,7 @@ public class CarAddFragment extends Fragment implements GetPicture {
                             car.carPicture = "";
                             Model.instance.addNewCarToCompany(car);
                             progressBar.setVisibility(GONE);
+                            progressBarAllLayout.setVisibility(View.GONE);
                             listener.onAction(CATALOG_CAR_ADD, null);
                         }
                     } else {
@@ -192,8 +196,6 @@ public class CarAddFragment extends Fragment implements GetPicture {
         imageUrl.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO:go to galary/camera
-                //dispatchTakePictureIntent();
                 progressBar.setVisibility(View.VISIBLE);
                 listener.onAction(CATALOG_ADD_PICTURE,null);
             }

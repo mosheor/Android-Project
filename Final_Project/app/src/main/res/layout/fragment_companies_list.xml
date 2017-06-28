@@ -1,14 +1,22 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.ben.final_project.Fragments.CompanyListFragment"
     android:orientation="vertical"
-    >
+    android:background="@color/white" >
 
     <ListView
         android:id="@+id/frag_companies_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"></ListView>
+    <ProgressBar
+        android:id="@+id/article_list_progressBar_all_layout"
+        style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Large"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_gravity="top|center"
+        android:layout_marginTop="100dp"
+        android:visibility="gone" />
 
-</LinearLayout>
+</FrameLayout>

@@ -27,6 +27,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,7 +44,6 @@ public class ArticleDetailsFragment extends Fragment {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMessageEvent(Model.UpdateCommentEvent event) {
-        Toast.makeText(getActivity(), "got new comment event", Toast.LENGTH_SHORT).show();
         Log.d("TAG","new comment");
         boolean exist = false;
         for (Comment comment : articleData.comments) {
@@ -56,8 +56,14 @@ public class ArticleDetailsFragment extends Fragment {
         if (!exist && articleId.equals(event.comment.articleID)) {
             articleData.comments.add(event.comment);
         }
+
+       /*articleData.comments.sort(new Comparator<Comment>() {
+            @Override
+            public int compare(Comment comment, Comment t1) {
+                return (int)(comment.lastUpdatedDate-t1.lastUpdatedDate);
+            }
+        });*/
         adapter.notifyDataSetChanged();
-        commentsList.setSelection(0);
     }
 
     public static ArticleDetailsFragment newInstance(String param1) {
@@ -105,7 +111,6 @@ public class ArticleDetailsFragment extends Fragment {
             @Override
             public void onComplete(Article article) {
                 articleData = article;
-                image.setImageResource(R.drawable.car);//TODO : change for every image
                 mainTitle.setText(articleData.mainTitle);
                 subTitle.setText(articleData.subTitle);
                 author.setText(articleData.author);
@@ -118,18 +123,24 @@ public class ArticleDetailsFragment extends Fragment {
                 articleData.comments = new LinkedList<Comment>();
 
                 progressBar.setVisibility(View.VISIBLE);
-                Model.instance.getImage(article.imageUrl, new Model.GetImageListener() {
-                    @Override
-                    public void onSuccess(Bitmap imageLoad) {
-                        image.setImageBitmap(imageLoad);
-                        progressBar.setVisibility(View.GONE);
-                    }
+                if(!article.imageUrl.equals("")) {
+                    Model.instance.getImage(article.imageUrl, new Model.GetImageListener() {
+                        @Override
+                        public void onSuccess(Bitmap imageLoad) {
+                            image.setImageBitmap(imageLoad);
+                            progressBar.setVisibility(View.GONE);
+                        }
 
-                    @Override
-                    public void onFail() {
+                        @Override
+                        public void onFail() {
 
-                    }
-                });
+                        }
+                    });
+                }
+                else {
+                    image.setImageResource(R.drawable.car_icon);
+                    progressBar.setVisibility(View.GONE);
+                }
 
                 Model.instance.getArticleComments(articleId, new Model.GetArticleCommentsAndObserveCallback() {
                     @Override
@@ -161,22 +172,25 @@ public class ArticleDetailsFragment extends Fragment {
                     int ok = 0;
                     boolean save = true;
 
-                    if (newComment.getText().toString().equals(""))
-                        newComment.setError("You need write text");
+                    if(Model.instance.isConnectedUser()) {
+                        if (newComment.getText().toString().equals(""))
+                            newComment.setError("You need write text");
+                        else {
+                            Comment comment = new Comment();
+                            comment.commentContent = newComment.getText().toString();
+                            comment.author = Model.instance.getConnectedUserUsername();
+                            comment.articleID = articleId;
+
+                            comment.commentID = Model.generateRandomId();
+                            newComment.setText("");
+
+                            Model.instance.addNewCommentToArticle(comment);
+                            setListViewHeightBasedOnChildren(commentsList);
+                        }
+                    }
                     else {
-                        Comment comment = new Comment();
-                        comment.commentContent = newComment.getText().toString();
-                        comment.author = "bobo on fire";//TODO:current author from loged in user
-                        comment.articleID = articleId;//TODo:change generateRandomId
-
-                        comment.commentID = Model.generateRandomId();
+                        Toast.makeText(getActivity(), "You are not logged in", Toast.LENGTH_SHORT).show();
                         newComment.setText("");
-
-                        Model.instance.addNewCommentToArticle(comment);
-
-                        //articleData = Model.instance.getArticle(articleID);
-                        //notifyAdapter();
-                        setListViewHeightBasedOnChildren(commentsList);
                     }
                 }
                 else
@@ -257,10 +271,6 @@ public class ArticleDetailsFragment extends Fragment {
             Log.d("TAG","comment row");
             return convertView;
         }
-    }
-
-    public void notifyAdapter(){
-        adapter.notifyDataSetChanged();
     }
 
     @Override

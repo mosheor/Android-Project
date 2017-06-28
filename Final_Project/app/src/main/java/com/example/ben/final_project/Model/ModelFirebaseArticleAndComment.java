@@ -50,7 +50,7 @@ import static com.example.ben.final_project.Model.CommentSQL.COMMENT_TABLE;
  */
 public class ModelFirebaseArticleAndComment {
 
-    List<ChildEventListener> listeners = new LinkedList<ChildEventListener>();//todo remove all the listeners - or not?
+    List<ChildEventListener> listeners = new LinkedList<ChildEventListener>();
 
     /**
      * Add new article and save it remotely

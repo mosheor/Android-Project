@@ -2,8 +2,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.ben.final_project.Fragments.ArticleEditFragment">
+    tools:context="com.example.ben.final_project.Fragments.ArticleEditFragment"
+    android:background="@color/white">
 
+
+    <FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -258,5 +263,16 @@
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
+    <ProgressBar
+        android:id="@+id/edit_article_progressBar_all_layout"
+        style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Large"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_gravity="bottom|center"
+        android:layout_marginBottom="100dp"
+        android:visibility="gone" />
+
+
+    </FrameLayout>
 
 </ScrollView>

@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     tools:context="com.example.ben.final_project.Fragments.CarDetailsFragment"
     android:layout_marginLeft="5dp"
-    >
+    android:background="@color/white" >
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -56,7 +56,6 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="5dp"/>
 
-            <!-- TODO:change to spinner-->
         </LinearLayout>
 
         <TextView
@@ -105,7 +104,6 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="5dp"/>
 
-            <!-- TODO:change to spinner-->
         </LinearLayout>
 
         <LinearLayout
@@ -244,8 +242,6 @@
                 android:layout_marginRight="5dp"/>
         </LinearLayout>
 
-        <!-- TODO:add more????-->
-        <!-- TODO:add tabs - auto and gear????-->
     </LinearLayout>
 
 </ScrollView>

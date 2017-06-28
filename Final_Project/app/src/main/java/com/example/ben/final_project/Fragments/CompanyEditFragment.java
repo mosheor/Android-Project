@@ -68,11 +68,14 @@ public class CompanyEditFragment extends Fragment implements GetPicture {
         imageUrl = (ImageView) containerView.findViewById(R.id.edit_article_image);
         progressBar = (ProgressBar) containerView.findViewById(R.id.edit_company_progressBar);
         progressBar.setVisibility(GONE);
+        final ProgressBar progressBarAllLayout = (ProgressBar) containerView.findViewById(R.id.edit_company_progressBar_all_layout);
+        progressBarAllLayout.setVisibility(View.VISIBLE);
 
         company = new Company();
         Model.instance.getCompany(companyId, new Model.GetCompanyCallback() {
             @Override
             public void onComplete(Company onCompleteCompany) {
+                progressBarAllLayout.setVisibility(View.GONE);
                 company = onCompleteCompany;
                 companyName.setText(company.name);
                 description.setText(company.companyDescription);
@@ -102,18 +105,18 @@ public class CompanyEditFragment extends Fragment implements GetPicture {
             public void onClick(View v) {
                 if(Model.instance.isNetworkAvailable()) {
                     Log.d("TAG", "CompanyEditFragment Btn Save click");
-
+                    progressBarAllLayout.setVisibility(View.VISIBLE);
                     int ok = 0;
                     boolean save = true;
 
-                    ok += valid(companyName, "Main title is required!");//TODO:write errors in hebrew
+                    ok += valid(companyName, "Main title is required!");
                     ok += valid(description, "Content is required!");
 
                     if (ok != 2)
                         save = false;
                     else {
                         if (companyName.getText().toString().compareTo(company.name) == 0)
-                            if (imageBitmap != null)
+                            if (imageBitmap == null)
                                 if (description.getText().toString().compareTo(company.companyDescription) == 0)
                                     save = false;
 
@@ -131,6 +134,7 @@ public class CompanyEditFragment extends Fragment implements GetPicture {
                                     company.companyLogo = url;
                                     Model.instance.editCompany(company);
                                     progressBar.setVisibility(GONE);
+                                    progressBarAllLayout.setVisibility(View.GONE);
                                     listener.onAction(CATALOG_COMPANY_EDIT, null);
                                 }
 
@@ -138,12 +142,15 @@ public class CompanyEditFragment extends Fragment implements GetPicture {
                                 public void fail() {
                                     //notify operation fail,...
                                     Model.instance.editCompany(company);
+                                    progressBar.setVisibility(GONE);
+                                    progressBarAllLayout.setVisibility(View.GONE);
                                     listener.onAction(CATALOG_COMPANY_EDIT, null);
                                 }
                             });
                         } else {
                             company.companyLogo = "";
                             Model.instance.editCompany(company);
+                            progressBar.setVisibility(GONE);
                             progressBar.setVisibility(GONE);
                             listener.onAction(CATALOG_COMPANY_EDIT, null);
                         }
@@ -184,8 +191,6 @@ public class CompanyEditFragment extends Fragment implements GetPicture {
         imageUrl.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-            //TODO:go to galary/camera
-            //dispatchTakePictureIntent();
             progressBar.setVisibility(View.VISIBLE);
             listener.onAction(CATALOG_ADD_PICTURE,null);
             }
@@ -236,6 +241,7 @@ public class CompanyEditFragment extends Fragment implements GetPicture {
     public void getPicture(Bitmap bitmap) {
         progressBar.setVisibility(GONE);
         imageBitmap = bitmap;
-        imageUrl.setImageBitmap(bitmap);
+        if(bitmap != null)
+            imageUrl.setImageBitmap(bitmap);
     }
 }

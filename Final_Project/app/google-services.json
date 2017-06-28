@@ -1,27 +1,27 @@
 {
   "project_info": {
-    "project_number": "498474211371",
-    "firebase_url": "https://androidngtds.firebaseio.com",
-    "project_id": "androidngtds",
-    "storage_bucket": "androidngtds.appspot.com"
+    "project_number": "65141224532",
+    "firebase_url": "https://testproject-f31b0.firebaseio.com",
+    "project_id": "testproject-f31b0",
+    "storage_bucket": "testproject-f31b0.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:498474211371:android:a310538388bfb04b",
+        "mobilesdk_app_id": "1:65141224532:android:a310538388bfb04b",
         "android_client_info": {
           "package_name": "com.example.ben.final_project"
         }
       },
       "oauth_client": [
         {
-          "client_id": "498474211371-5v6ken1duiv5u8hjc0k752h2tejrploq.apps.googleusercontent.com",
+          "client_id": "65141224532-n4h6j24f1b87eerqqdn52n1t3l7vsll4.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyD0aKb3-el7jHgQ4qsAba6QIo8PkYoQ-X8"
+          "current_key": "AIzaSyBm5AP_OSgozx9ARgGLLqed3qjCV5LeQNI"
         }
       ],
       "services": {

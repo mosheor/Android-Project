@@ -77,6 +77,8 @@ public class ArticleEditFragment extends Fragment implements GetPicture {
         imageUrl = (ImageView) containerView.findViewById(R.id.edit_article_image);
         progressBar = (ProgressBar) containerView.findViewById(R.id.edit_article_progressBar);
         progressBar.setVisibility(GONE);
+        final ProgressBar progressBarAllLayout = (ProgressBar) containerView.findViewById(R.id.edit_article_progressBar_all_layout);
+        progressBarAllLayout.setVisibility(View.VISIBLE);
 
         article = new Article();
         Model.instance.getArticle(mParam1, new Model.GetArticleCallback() {
@@ -92,19 +94,26 @@ public class ArticleEditFragment extends Fragment implements GetPicture {
 
                 date.setText(sfd.format(new Date((long)article.publishDate + 3600000 * 7)));
                 date.setEnabled(false);
+                progressBarAllLayout.setVisibility(View.GONE);
                 progressBar.setVisibility(View.VISIBLE);
-                Model.instance.getImage(article.imageUrl, new Model.GetImageListener() {
-                    @Override
-                    public void onSuccess(Bitmap image) {
-                        imageUrl.setImageBitmap(image);
-                        progressBar.setVisibility(View.GONE);
-                    }
+                if(!article.imageUrl.equals("")) {
+                    Model.instance.getImage(article.imageUrl, new Model.GetImageListener() {
+                        @Override
+                        public void onSuccess(Bitmap image) {
+                            imageUrl.setImageBitmap(image);
+                            progressBar.setVisibility(View.GONE);
+                        }
 
-                    @Override
-                    public void onFail() {
+                        @Override
+                        public void onFail() {
 
-                    }
-                });
+                        }
+                    });
+                }
+                else{
+                    imageUrl.setImageResource(R.drawable.blue_plus_icon);
+                    progressBar.setVisibility(View.GONE);
+                }
 
 
             }
@@ -120,24 +129,24 @@ public class ArticleEditFragment extends Fragment implements GetPicture {
             public void onClick(View v) {
                 if (Model.instance.isNetworkAvailable()) {
                     Log.d("TAG", "ArticleAddFragment Btn Save click");
+                    progressBarAllLayout.setVisibility(View.VISIBLE);
 
                     int ok = 0;
                     boolean save = true;
 
-                    ok += valied(mainTitle, "Main title is required!");//TODO:write errors in hebrew
+                    ok += valied(mainTitle, "Main title is required!");
                     ok += valied(author, "Author name is required!");
                     ok += valied(content, "Content is required!");
-                    ok += valied(date, "Date is required!");
                     ok += valied(subTitle, "Sub title is required!");
 
-                    if (ok != 5)
+                    if (ok != 4)
                         save = false;
                     else {
                         if (author.getText().toString().compareTo(article.author) == 0)
                             if (mainTitle.getText().toString().compareTo(article.mainTitle) == 0)
                                 if (subTitle.getText().toString().compareTo(article.subTitle) == 0)
                                     if (content.getText().toString().compareTo(article.content) == 0)
-                                        if(imageBitmap != null)
+                                        if(imageBitmap == null)
                                             save = false;
 
                     }
@@ -148,6 +157,8 @@ public class ArticleEditFragment extends Fragment implements GetPicture {
                         article.subTitle = subTitle.getText().toString();
                         article.content = content.getText().toString();
 
+                        Log.d("TAG","bitmap = " + imageBitmap);
+
                         if (imageBitmap != null) {
                             Model.instance.saveImage(imageBitmap, Model.generateRandomId() + ".jpeg", new Model.SaveImageListener() {
                                 @Override
@@ -155,6 +166,7 @@ public class ArticleEditFragment extends Fragment implements GetPicture {
                                     article.imageUrl = url;
                                     Model.instance.editArticle(article);
                                     progressBar.setVisibility(GONE);
+                                    progressBarAllLayout.setVisibility(View.GONE);
                                     listener.onAction(ARTICLE_EDIT, null);
                                 }
 
@@ -162,6 +174,7 @@ public class ArticleEditFragment extends Fragment implements GetPicture {
                                 public void fail() {
                                     //notify operation fail,...
                                     progressBar.setVisibility(GONE);
+                                    progressBarAllLayout.setVisibility(View.GONE);
                                     listener.onAction(ARTICLE_ADD, null);
                                 }
                             });
@@ -169,6 +182,7 @@ public class ArticleEditFragment extends Fragment implements GetPicture {
                             article.imageUrl = "";
                             Model.instance.editArticle(article);
                             progressBar.setVisibility(GONE);
+                            progressBarAllLayout.setVisibility(View.GONE);
                             listener.onAction(ARTICLE_EDIT, null);
                         }
                     } else {
@@ -186,8 +200,6 @@ public class ArticleEditFragment extends Fragment implements GetPicture {
         imageUrl.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-            //TODO:go to galary/camera
-            //dispatchTakePictureIntent();
             progressBar.setVisibility(View.VISIBLE);
             listener.onAction(ADD_PICTURE,null);
             }
@@ -258,6 +270,7 @@ public class ArticleEditFragment extends Fragment implements GetPicture {
     public void getPicture(Bitmap bitmap) {
         progressBar.setVisibility(GONE);
         imageBitmap = bitmap;
-        imageUrl.setImageBitmap(bitmap);
+        if(bitmap != null)
+            imageUrl.setImageBitmap(bitmap);
     }
 }

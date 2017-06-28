@@ -44,37 +44,26 @@ public class SearchFragment extends Fragment {
         final List<String> companiesId = new ArrayList<String>();
         final List<String> companiesName = new ArrayList<String>();
 
-        Model.instance.getAllCompanies(new Model.GetAllCompaniesAndObserveCallback() {
-            @Override
-            public void onComplete(List<Company> list) {
-                companiesData = list;
-                companiesName.add("כל היצרנים");
-                companiesId.add("-1");
-                for(Company company:companiesData) {
-                    companiesId.add(company.companyId);
-                    companiesName.add(company.name);
-                }
+        companiesData = Model.instance.getAllCompanies();
+        companiesName.add("כל היצרנים");
+        companiesId.add("-1");
+        for(Company company:companiesData) {
+            companiesId.add(company.companyId);
+            companiesName.add(company.name);
+        }
 
-                ArrayAdapter<String> companyAdapter = new ArrayAdapter<String>(SearchFragment.this.getActivity(), android.R.layout.simple_spinner_item, companiesName);
-                companyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                companys.setAdapter(companyAdapter);
+        ArrayAdapter<String> companyAdapter = new ArrayAdapter<String>(SearchFragment.this.getActivity(), android.R.layout.simple_spinner_item, companiesName);
+        companyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        companys.setAdapter(companyAdapter);
 
-                ArrayAdapter<CharSequence> hpAdapter = ArrayAdapter.createFromResource(SearchFragment.this.getActivity(), R.array.car_hp_array, android.R.layout.simple_spinner_item);
-                hpAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                hp.setAdapter(hpAdapter);
+        ArrayAdapter<CharSequence> hpAdapter = ArrayAdapter.createFromResource(SearchFragment.this.getActivity(), R.array.car_hp_array, android.R.layout.simple_spinner_item);
+        hpAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        hp.setAdapter(hpAdapter);
 
-                ArrayAdapter<CharSequence> engineVolumeAdapter = ArrayAdapter.createFromResource(SearchFragment.this.getActivity(),
-                        R.array.car_engine_volume_array, android.R.layout.simple_spinner_item);
-                engineVolumeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                engineVolume.setAdapter(engineVolumeAdapter);
-            }
-
-            @Override
-            public void onCancel() {
-
-            }
-        });
-
+        ArrayAdapter<CharSequence> engineVolumeAdapter = ArrayAdapter.createFromResource(SearchFragment.this.getActivity(),
+                R.array.car_engine_volume_array, android.R.layout.simple_spinner_item);
+        engineVolumeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        engineVolume.setAdapter(engineVolumeAdapter);
 
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override

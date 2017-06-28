@@ -28,6 +28,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALOG_CAR_DETAILS;
@@ -37,7 +38,7 @@ public class CarListFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";//company articleID
     private String companyId;
     ListView list;
-    List<Car> carsData;
+    List<Car> carsData = new LinkedList<Car>();
     Company company;
     CarListAdapter adapter;
     FragmentsDelegate listener;
@@ -52,7 +53,6 @@ public class CarListFragment extends Fragment {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMessageEvent(Model.UpdateCarEvent event) {
-        Toast.makeText(getActivity(), "got new car event", Toast.LENGTH_SHORT).show();
         Log.d("TAG","new comment");
         boolean exist = false;
         for (Car car : carsData) {
@@ -91,6 +91,8 @@ public class CarListFragment extends Fragment {
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d("TAG","CompanyListFragment onCreateView");
         final View containerView = inflater.inflate(R.layout.fragment_cars_list, container, false);
+        final ProgressBar p = (ProgressBar) containerView.findViewById(R.id.car_list_progressBar_all_layout);
+        p.setVisibility(View.VISIBLE);
         adapter = new CarListAdapter();
         adapter.setInflater(inflater);
         list = (ListView) containerView.findViewById(R.id.frag_cars_list);
@@ -101,17 +103,17 @@ public class CarListFragment extends Fragment {
                 Model.instance.getCompanyCars(companyId, new Model.GetCompanyCarsCallback() {
                     @Override
                     public void onComplete(List<Car> onCompleteList) {
+                        p.setVisibility(View.GONE);
                         carsData = onCompleteList;
+                        if(carsData.size() == 0)
+                            Toast.makeText(getActivity(),"There are no cars",Toast.LENGTH_SHORT).show();
                         list.setAdapter(adapter);
+                        adapter.notifyDataSetChanged();
                         TextView companyNameTW = (TextView) containerView.findViewById(R.id.car_list_company_name);
                         final ImageView companyImage = (ImageView) containerView.findViewById(R.id.car_list_company_image);
                         final ProgressBar progressBar = (ProgressBar) containerView.findViewById(R.id.car_list_progressBar);
-
-                        companyImage.setImageResource(R.drawable.bugatti);//TODO:change to current company
                         companyNameTW.setText(company.name);
-
                         companyImage.setTag(company.companyLogo);
-                        //imageView.setImageDrawable(getDrawable(R.drawable.avatar));
 
                         if (company.companyLogo != null && !company.companyLogo.isEmpty() && !company.companyLogo.equals("")) {
                             progressBar.setVisibility(View.VISIBLE);

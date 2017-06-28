@@ -2,6 +2,7 @@ package com.example.ben.final_project.Model;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
@@ -72,16 +73,20 @@ public class CommentSQL {
         values.put(COMMENT_CONTENT, comment.commentContent);
         values.put(COMMENT_LAST_UPDATED, comment.lastUpdatedDate);
         values.put(COMMENT_ARTICLE_ID, comment.articleID);
-        db.insert(COMMENT_TABLE, COMMENT_ID, values);
+
+        try {
+            db.insert(COMMENT_TABLE, COMMENT_ID, values);
+        }catch (Exception e){ }
     }
 
     static void onCreate(SQLiteDatabase db) {
+        Log.d("TAG","dddd");
         db.execSQL("create table " + COMMENT_TABLE +
                 " (" +
                 COMMENT_ID + " TEXT PRIMARY KEY, " +
                 COMMENT_AUTHOR + " TEXT, " +
                 COMMENT_CONTENT + " TEXT, " +
-                COMMENT_LAST_UPDATED + " DOUBLE, " +
+                COMMENT_LAST_UPDATED + " NUMBER, " +
                 COMMENT_ARTICLE_ID + " TEXT);");
     }
 

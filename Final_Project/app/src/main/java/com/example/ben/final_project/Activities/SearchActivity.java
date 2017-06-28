@@ -111,6 +111,10 @@ public class SearchActivity extends Activity implements SearchFragment.SearchFra
         return true;
     }
 
+    /**
+     * Commit an intent to activity and finish this activity
+     * @param to the activity class to open
+     */
     private void commitIntentToActivityAndFinish(Class to)
     {
         Intent intent = new Intent(this, to);

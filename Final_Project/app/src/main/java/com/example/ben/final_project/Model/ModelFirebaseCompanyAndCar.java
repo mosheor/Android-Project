@@ -49,7 +49,7 @@ import static com.example.ben.final_project.Model.CarSQL.CAR_ZERO_TO_HUNDRED;
  */
 public class ModelFirebaseCompanyAndCar {
 
-    List<ChildEventListener> listeners = new LinkedList<ChildEventListener>();//todo remove all the listeners - or not?
+    List<ChildEventListener> listeners = new LinkedList<ChildEventListener>();
 
     /**
      * Add a new company in the Firebase.

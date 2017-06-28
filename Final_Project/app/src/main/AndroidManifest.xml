@@ -15,27 +15,28 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Activities.MainActivity">
+        <activity android:name=".Activities.MainActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Activities.AboutActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity android:name=".Activities.ArticlesActivity" />
-        <activity android:name=".Activities.CarCatalogActivity" />
-        <activity android:name=".Activities.SearchActivity" />
-        <activity android:name=".Activities.RegisterActivity" />
+        <activity android:name=".Activities.AboutActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".Activities.ArticlesActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".Activities.CarCatalogActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".Activities.SearchActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".Activities.RegisterActivity"
+        android:screenOrientation="portrait" />
         <activity
             android:name=".Activities.LoginActivity"
-            android:label="@string/title_activity_login" />
+            android:label="@string/title_activity_login"
+            android:screenOrientation="portrait"/>
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />

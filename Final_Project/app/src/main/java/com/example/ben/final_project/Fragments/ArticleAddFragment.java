@@ -30,32 +30,13 @@ import static com.example.ben.final_project.Activities.ArticlesActivity.ARTICLE_
 import static com.example.ben.final_project.Activities.ArticlesActivity.ADD_PICTURE;
 
 public class ArticleAddFragment extends Fragment implements GetPicture {
-    private static final String ARG_PARAM1 = "param1";//last article articleID
-    private String mParam1;
     private FragmentsDelegate listener;
     ImageView imageView;
     ProgressBar progressBar;
     Bitmap imageBitmap;
 
-
-    public static ArticleAddFragment newInstance(String param1) {
-        ArticleAddFragment fragment = new ArticleAddFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     public void setDelegate(FragmentsDelegate listener){
         this.listener = listener;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-        }
     }
 
     @Override
@@ -72,21 +53,22 @@ public class ArticleAddFragment extends Fragment implements GetPicture {
 
         progressBar = (ProgressBar) containerView.findViewById(R.id.add_article_progressBar);
         progressBar.setVisibility(GONE);
+        final ProgressBar progressBarAllLayout = (ProgressBar) containerView.findViewById(R.id.add_article_progressBar_all_layout);
 
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(Model.instance.isNetworkAvailable()) {
+                    progressBarAllLayout.setVisibility(View.VISIBLE);
                     progressBar.setVisibility(View.VISIBLE);
                     Log.d("TAG", "ArticleAddFragment Btn Save click");
 
                     int ok = 0;
                     boolean save = true;
 
-                    ok += valid(mainTitle, "Main title is required!");//TODO:write errors in hebrew
+                    ok += valid(mainTitle, "Main title is required!");
                     ok += valid(author, "Author name is required!");
                     ok += valid(content, "Content is required!");
-                    //ok += valid(date,"Date is required!");
                     ok += valid(subTitle, "Sub title is required!");
 
                     if (ok != 4)
@@ -102,6 +84,7 @@ public class ArticleAddFragment extends Fragment implements GetPicture {
                         article.subTitle = subTitle.getText().toString();
                         article.content = content.getText().toString();
                         article.wasDeleted = false;
+                        article.imageUrl = "";
 
                         if (imageBitmap != null) {
                             Model.instance.saveImage(imageBitmap,  Model.generateRandomId()  + ".jpeg", new Model.SaveImageListener() {
@@ -110,6 +93,7 @@ public class ArticleAddFragment extends Fragment implements GetPicture {
                                     article.imageUrl = url;
                                     Model.instance.addNewArticle(article);
                                     progressBar.setVisibility(GONE);
+                                    progressBarAllLayout.setVisibility(GONE);
                                     listener.onAction(ARTICLE_ADD, null);
                                 }
 
@@ -117,6 +101,7 @@ public class ArticleAddFragment extends Fragment implements GetPicture {
                                 public void fail() {
                                     //notify operation fail,...
                                     progressBar.setVisibility(GONE);
+                                    progressBarAllLayout.setVisibility(GONE);
                                     listener.onAction(ARTICLE_ADD, null);
                                 }
                             });
@@ -124,6 +109,7 @@ public class ArticleAddFragment extends Fragment implements GetPicture {
                             article.imageUrl = "";
                             Model.instance.addNewArticle(article);
                             progressBar.setVisibility(GONE);
+                            progressBarAllLayout.setVisibility(GONE);
                             listener.onAction(ARTICLE_ADD, null);
                         }
 
@@ -151,8 +137,7 @@ public class ArticleAddFragment extends Fragment implements GetPicture {
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO:go to galary/camera
-                //dispatchTakePictureIntent();
+                imageBitmap = null;
                 progressBar.setVisibility(View.VISIBLE);
                 listener.onAction(ADD_PICTURE,null);
             }
@@ -202,6 +187,7 @@ public class ArticleAddFragment extends Fragment implements GetPicture {
     public void getPicture(Bitmap bitmap) {
         progressBar.setVisibility(GONE);
         imageBitmap = bitmap;
-        imageView.setImageBitmap(bitmap);
+        if(bitmap != null)
+            imageView.setImageBitmap(bitmap);
     }
 }

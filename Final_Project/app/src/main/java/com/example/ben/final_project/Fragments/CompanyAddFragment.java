@@ -30,44 +30,19 @@ import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALO
 import static com.example.ben.final_project.Activities.CarCatalogActivity.CATALOG_COMPANY_ADD;
 
 public class CompanyAddFragment extends Fragment implements GetPicture {
-    private static final String ARG_PARAM1 = "param1";//last company articleID
-    private String lastCompanyId;
     private FragmentsDelegate listener;
     ImageView imageView;
     ProgressBar progressBar;
     Bitmap imageBitmap;
-
-    public static CompanyAddFragment newInstance(String param1) {
-        CompanyAddFragment fragment = new CompanyAddFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     public void setDelegate(FragmentsDelegate listener){
         this.listener = listener;
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            lastCompanyId = getArguments().getString(ARG_PARAM1);
-        }
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d("TAG","AddNewCompanyFragment onCreateView");
         View containerView = inflater.inflate(R.layout.fragment_add_company, container, false);
-
-        final String newCompanyID;
-        /*if(Integer.parseInt(lastCompanyId) > 0)
-            newCompanyID = Model.instance.getAllCompanies().get(Integer.parseInt(lastCompanyId) - 1).id + 1;
-        else
-            newCompanyID = "0";*/
-
         Button saveButton = (Button) containerView.findViewById(R.id.add_company_save_button);
         Button cancelButton = (Button) containerView.findViewById(R.id.add_company_cancel_button);
         final EditText companyName = (EditText) containerView.findViewById(R.id.add_company_name);
@@ -75,17 +50,20 @@ public class CompanyAddFragment extends Fragment implements GetPicture {
         final EditText description = (EditText) containerView.findViewById(R.id.add_company_description);
         progressBar = (ProgressBar) containerView.findViewById(R.id.add_company_progressBar);
         progressBar.setVisibility(GONE);
+        final ProgressBar progressBarAllLayout = (ProgressBar) containerView.findViewById(R.id.add_company_progressBar_all_layout);
+        progressBarAllLayout.setVisibility(View.GONE);
 
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(Model.instance.isNetworkAvailable()) {
                     Log.d("TAG", "CompanyAddFragment Btn Save click");
+                    progressBarAllLayout.setVisibility(View.VISIBLE);
 
                     int ok = 0;
                     boolean save = true;
 
-                    ok += valid(companyName, "Company name is required!");//TODO:write errors in hebrew
+                    ok += valid(companyName, "Company name is required!");
                     ok += valid(description, "Description is required!");
 
                     if (ok != 2)
@@ -96,6 +74,7 @@ public class CompanyAddFragment extends Fragment implements GetPicture {
                         company.companyId = Model.generateRandomId();
                         company.name = companyName.getText().toString();
                         company.companyDescription = description.getText().toString();
+                        company.companyLogo = "";
                         company.models = new LinkedList<Car>();
 
                         if (imageBitmap != null) {
@@ -105,6 +84,7 @@ public class CompanyAddFragment extends Fragment implements GetPicture {
                                     company.companyLogo = url;
                                     Model.instance.addNewCompany(company);
                                     progressBar.setVisibility(GONE);
+                                    progressBarAllLayout.setVisibility(View.GONE);
                                     listener.onAction(CATALOG_COMPANY_ADD, null);
                                 }
 
@@ -112,6 +92,7 @@ public class CompanyAddFragment extends Fragment implements GetPicture {
                                 public void fail() {
                                     //notify operation fail,...
                                     progressBar.setVisibility(GONE);
+                                    progressBarAllLayout.setVisibility(View.GONE);
                                     listener.onAction(CATALOG_COMPANY_ADD, null);
                                 }
                             });
@@ -119,6 +100,7 @@ public class CompanyAddFragment extends Fragment implements GetPicture {
                             company.companyLogo = "";
                             Model.instance.addNewCompany(company);
                             progressBar.setVisibility(GONE);
+                            progressBarAllLayout.setVisibility(View.GONE);
                             listener.onAction(CATALOG_COMPANY_ADD, null);
                         }
                     } else {
@@ -144,8 +126,6 @@ public class CompanyAddFragment extends Fragment implements GetPicture {
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO:go to galary/camera
-                //dispatchTakePictureIntent();
                 progressBar.setVisibility(View.VISIBLE);
                 listener.onAction(CATALOG_ADD_PICTURE,null);
             }
@@ -196,6 +176,7 @@ public class CompanyAddFragment extends Fragment implements GetPicture {
     public void getPicture(Bitmap bitmap) {
         progressBar.setVisibility(GONE);
         imageBitmap = bitmap;
-        imageView.setImageBitmap(bitmap);
+        if(bitmap != null)
+            imageView.setImageBitmap(bitmap);
     }
 }

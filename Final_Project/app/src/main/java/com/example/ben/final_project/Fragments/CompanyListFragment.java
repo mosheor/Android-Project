@@ -81,24 +81,15 @@ public class CompanyListFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.d("TAG","CompanyListFragment onCreateView");
         View containerView = inflater.inflate(R.layout.fragment_companies_list, container, false);
         adapter = new CompanyListAdapter();
         adapter.setInflater(inflater);
         list = (ListView) containerView.findViewById(R.id.frag_companies_list);
         list.setAdapter(adapter);
 
-        Model.instance.getAllCompanies(new Model.GetAllCompaniesAndObserveCallback() {
-            @Override
-            public void onComplete(List<Company> list) {
-                companiesData = list;
-            }
-
-            @Override
-            public void onCancel() {
-
-            }
-        });
+        companiesData = Model.instance.getAllCompanies();
+        if(companiesData.size() == 0)
+            Toast.makeText(getActivity(),"There are no companies",Toast.LENGTH_SHORT).show();
 
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
