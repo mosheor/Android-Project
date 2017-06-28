@@ -144,7 +144,7 @@ public class RegisterActivity extends Activity {
                 Toast.makeText(this, "you are already here", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.menu_search:
-                intentClass = AboutActivity.class;
+                intentClass = SearchActivity.class;
                 break;
             case R.id.menu_main:
                 commitIntent = false;

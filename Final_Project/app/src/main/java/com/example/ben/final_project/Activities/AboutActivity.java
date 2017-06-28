@@ -70,7 +70,7 @@ public class AboutActivity extends Activity {
                 intentClass = RegisterActivity.class;
                 break;
             case R.id.menu_search:
-                intentClass = AboutActivity.class;
+                intentClass = SearchActivity.class;
                 break;
             case R.id.menu_main:
                 commitIntent = false;
