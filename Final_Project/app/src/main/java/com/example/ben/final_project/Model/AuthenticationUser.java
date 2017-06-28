@@ -20,23 +20,38 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.concurrent.Executor;
 
 /**
- * Created by mazliachbe on 25/06/2017.
+ * Created by mosheor on 25/06/2017.
  */
 
+/**
+ * AuthenticationUser class to handle authentication with Firebase
+ */
 public class AuthenticationUser {
 
     FirebaseUser connectedUser;
     FirebaseAuth mAuth;
 
+    /**
+     * Default ctor
+     */
     public AuthenticationUser(){
         mAuth = FirebaseAuth.getInstance();
     }
 
+    /**
+     * Callback fires when Firebase responses for creating an account
+     */
     public interface CreateAccountCallback{
         void onComplete();
         void onFail();
     }
 
+    /**
+     * Create an account to Firebase ASYNC.
+     * @param email the users email.
+     * @param password the users password.
+     * @param callback see {@link CreateAccountCallback}.
+     */
     void createAccount(String email, String password, final CreateAccountCallback callback) {
         // [START create_user_with_email]
         mAuth.createUserWithEmailAndPassword(email, password)
@@ -57,11 +72,20 @@ public class AuthenticationUser {
         // [END create_user_with_email]
     }
 
+    /**
+     * Callback fires when Firebase responses for sign in an account
+     */
     interface SignInCallback{
         void onComplete();
         void onFail();
     }
 
+    /**
+     * sign in user to Firebase ASYNC.
+     * @param email the users email.
+     * @param password the users password.
+     * @param callback see {@link SignInCallback}.
+     */
      void signIn(String email, String password, final SignInCallback callback) {
         // [START sign_in_with_email]
         mAuth.signInWithEmailAndPassword(email, password)
@@ -89,24 +113,39 @@ public class AuthenticationUser {
         // [END sign_in_with_email]
     }
 
+    /**
+     * Check if there is a session with Firebase.
+     * @return true if the user is connected, else false.
+     */
     boolean isConnectedUser(){
         if(connectedUser!=null)
             return true;
         return false;
     }
 
+    /**
+     * Get a connected user email
+     * @return the email of the connected user
+     */
     String getConnectedUserEmail(){
         if(connectedUser!=null)
             return connectedUser.getEmail();
         return null;
     }
 
+    /**
+     * Get a connected user username
+     * @return the username of the connected user
+     */
     String getConnectedUserUsername(){
         if(connectedUser!=null)
             return connectedUser.getEmail().substring(0,connectedUser.getEmail().indexOf("@"));
         return null;
     }
 
+    /**
+     * Finish login session with Firebase.
+     */
     void signOut() {
         mAuth.signOut();
         connectedUser = null;

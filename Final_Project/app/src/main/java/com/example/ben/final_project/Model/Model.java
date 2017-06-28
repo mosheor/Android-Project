@@ -624,6 +624,12 @@ public class Model {
 
 
 
+    /**
+     * Create an account to Firebase ASYNC.
+     * @param email the users email.
+     * @param password the users password.
+     * @param callback see {@link AuthenticationUser.CreateAccountCallback}.
+     */
     public void createAccount(String email, String password, final AuthenticationUser.CreateAccountCallback callback){
         authenticationUser.createAccount(email, password, new AuthenticationUser.CreateAccountCallback() {
             @Override
@@ -638,6 +644,12 @@ public class Model {
         });
     }
 
+    /**
+     * sign in user to Firebase ASYNC.
+     * @param email the users email.
+     * @param password the users password.
+     * @param callback see {@link AuthenticationUser.SignInCallback}.
+     */
     public void signIn(String email, String password, final AuthenticationUser.CreateAccountCallback callback){
         authenticationUser.signIn(email, password, new AuthenticationUser.SignInCallback() {
             @Override
@@ -652,6 +664,10 @@ public class Model {
         });
     }
 
+    /**
+     * Check if there is a session with Firebase.
+     * @return true if the user is connected, else false.
+     */
     public boolean isConnectedUser(){
         return authenticationUser.isConnectedUser();
     }
@@ -660,15 +676,25 @@ public class Model {
         return authenticationUser.getConnectedUserEmail();
     }
 
+    /**
+     * Get a connected user username
+     * @return the username of the connected user
+     */
     public String getConnectedUserUsername(){
         return authenticationUser.getConnectedUserUsername();
     }
 
-
+    /**
+     * Finish login session with Firebase.
+     */
     public void signOut() {
         authenticationUser.signOut();
     }
 
+    /**
+     * Check if the connected account is admin
+     * @return
+     */
     public boolean isAdmin(){
         return Model.instance.getConnectedUserEmail().equals("benmazliach@gmail.com");
     }
